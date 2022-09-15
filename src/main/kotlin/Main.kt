@@ -65,10 +65,9 @@ class Kotlog(args: Array<String>) {
         val generate by parser.option(ArgType.Boolean, shortName = "g", description = "Generate blog")
         parser.parse(args)
 
-        if(title != null && title?.isNotBlank() == true) {
+        if (title != null && title?.isNotBlank() == true) {
             createMarkdownPost(title!!)
-        }
-        else if(generate == true) {
+        } else if (generate == true) {
             generate(BlogConfiguration("Tobias Scholze | The Stuttering Nerd"))
         }
     }
@@ -85,8 +84,17 @@ class Kotlog(args: Array<String>) {
 
         writeToPosts(filename, markdown)
         printNewPostMessage(filename)
+        openMarkdownPostIfNeeded(filename)
     }
 
+    private fun openMarkdownPostIfNeeded(filename: String) {
+        print("Open Markdown file? (y/n)\n> ")
+        val boolString = readLine()
+
+        if(boolString == "y") {
+            Runtime.getRuntime().exec("code $RELATIVE_POSTS_PATH/$filename")
+        }
+    }
     private fun generate(configuration: BlogConfiguration): Boolean {
 
         // 1. Clean existing output if needed.
@@ -115,16 +123,21 @@ class Kotlog(args: Array<String>) {
 
     private fun printOutputFilePath() {
         print(
-            "Output:\nopen ${Paths.get("")
-            .toAbsolutePath()}/$RELATIVE_OUTPUT_PATH/$DEFAULT_INDEX_OUTPUT_FILENAME"
+            """
+                Output:\nopen ${
+                Paths.get("")
+                    .toAbsolutePath()
+            }/$RELATIVE_OUTPUT_PATH/$DEFAULT_INDEX_OUTPUT_FILENAME
+            """
         )
     }
 
     private fun printNewPostMessage(filenameWithExtension: String) {
-        print(
-            "New post '$filenameWithExtension' has been created!\nOpen ${Paths.get("")
-                .toAbsolutePath()}/$RELATIVE_POSTS_PATH/$filenameWithExtension to start writing your post."
-        )
+        println("")
+        println("New post '$filenameWithExtension' has been created!")
+        println("Location: ${Paths.get("").toAbsolutePath()}/$RELATIVE_POSTS_PATH/$filenameWithExtension")
+        println("Run `kotlog -g` to generate the html.")
+        println("")
     }
 
     private fun cleanOutput() {
