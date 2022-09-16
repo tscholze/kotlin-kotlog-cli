@@ -242,6 +242,7 @@ class Kotlog(args: Array<String>) {
     private fun generateIndex(blogConfiguration: BlogConfiguration) {
         // Create index file
         val content = readSnippetConfigurations()
+            .reversed()
             .joinToString("~") { inflateSnippetTemplate(it) }
 
         val html = readFromTemplates(DEFAULT_INDEX_TEMPLATE_NAME)
