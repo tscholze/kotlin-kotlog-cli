@@ -357,10 +357,11 @@ class Kotlog(args: Array<String>) {
 
     private fun pushToRemote() {
         val message = "Content update ${SimpleDateFormat(DEFAULT_DATE_PATTERN).format(Date())}"
-        Runtime.getRuntime().exec("cd $RELATIVE_OUTPUT_PATH")
-        Runtime.getRuntime().exec("git add .")
-        Runtime.getRuntime().exec("git commit -m '$message'")
-        Runtime.getRuntime().exec("git push")
+        val cmd1 = "git add ${Paths.get("").toAbsolutePath()}/$RELATIVE_OUTPUT_PATH/"
+        Runtime.getRuntime().exec("git add ${Paths.get("").toAbsolutePath()}/$RELATIVE_OUTPUT_PATH/*")
+        Runtime.getRuntime().exec("git add ${Paths.get("").toAbsolutePath()}/$RELATIVE_POSTS_PATH/*")
+        Runtime.getRuntime().exec("git commit -am '$message'")
+        Runtime.getRuntime().exec("git push origin main")
     }
 
     // MARK: - Sanity checks -
