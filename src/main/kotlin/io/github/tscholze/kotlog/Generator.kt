@@ -1,5 +1,6 @@
 package io.github.tscholze.kotlog
 
+import com.lordcodes.turtle.shellRun
 import io.github.tscholze.kotlog.models.BlogConfiguration
 import io.github.tscholze.kotlog.models.PostConfiguration
 import io.github.tscholze.kotlog.models.SnippetConfiguration
@@ -357,11 +358,12 @@ class Kotlog(args: Array<String>) {
 
     private fun pushToRemote() {
         val message = "Content update ${SimpleDateFormat(DEFAULT_DATE_PATTERN).format(Date())}"
-        val cmd1 = "git commit -am '$message'"
-        Runtime.getRuntime().exec("git add ${Paths.get("").toAbsolutePath()}/$RELATIVE_OUTPUT_PATH/*")
-        Runtime.getRuntime().exec("git add ${Paths.get("").toAbsolutePath()}/$RELATIVE_POSTS_PATH/*")
-        Runtime.getRuntime().exec("git commit -am")
-        Runtime.getRuntime().exec("git push origin main")
+        //Runtime.getRuntime().exec("cd ${Paths.get("").toAbsolutePath()}/")
+        shellRun {
+            git.commitAllChanges(message)
+            git.push("origin", "main")
+            git.currentBranch()
+        }
     }
 
     // MARK: - Sanity checks -

@@ -28,6 +28,7 @@ dependencies {
 
     // CLI
     implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.5")
+    implementation("com.lordcodes.turtle:turtle:0.8.0")
 
     // Test
     testImplementation(kotlin("test"))
