@@ -6,17 +6,36 @@ import org.commonmark.ext.front.matter.YamlFrontMatterVisitor
 import org.commonmark.node.Node
 import org.commonmark.renderer.html.HtmlRenderer
 
+/**
+ * Defines the blog layout
+ *
+ * @property title Title of the blog
+ * @property styleName: Name of the applied CSS theme. Default: latex
+ * @property alwaysClean: If true, the output will always be cleaned before creating new files.
+ */
 data class BlogConfiguration(
     val title: String,
     val styleName: String = Kotlog.DEFAULT_STYLE_NAME,
     val alwaysClean: Boolean = true,
 )
 
+/**
+ * Defines the post layout
+ *
+ * @property title Title of the blog post
+ * @property innerHtml Rendered inner html content
+*/
 class PostConfiguration(
     val title: String,
     val innerHtml: String
 ) {
     companion object {
+        /**
+         * Creates a new configuration from given node.
+         *
+         * @param node Markdown DOM Node that contains required information
+         * @return Created configuration object
+         */
         fun fromNode(node: Node): PostConfiguration {
             // Check for front matter
             val frontMatterVisitor = YamlFrontMatterVisitor()
@@ -31,15 +50,27 @@ class PostConfiguration(
         }
     }
 }
-
-@Serializable
-data class SnippetConfiguration(
-    val title: String,
-    val relativeUrl: String
-)
-
+/**
+ * Defines a YouTube component.
+ *
+ * @property title Title of the blog post
+ * @property videoUrl Url to the YouTube browser video
+ * @property embedUrl URl to the embedded YouTube player
+ */
 data class YouTubeComponentConfiguration(
     val title: String,
     val videoUrl: String,
     val embedUrl: String
+)
+
+/**
+ * Defines a content snippet
+ *
+ * @property title Title of the blog post
+ * @property relativeUrl Url to the corresponding html page
+ */
+@Serializable
+data class SnippetConfiguration(
+    val title: String,
+    val relativeUrl: String
 )
