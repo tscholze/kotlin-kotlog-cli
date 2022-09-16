@@ -161,7 +161,8 @@ class Kotlog(args: Array<String>) {
 
         if (boolString == "y") {
             shellRun {
-                command("code $RELATIVE_POSTS_PATH/$filename")
+                val path = "${Paths.get("").toAbsolutePath()}/$RELATIVE_POSTS_PATH/$filename"
+                command("code", listOf(path))
             }
         }
     }
