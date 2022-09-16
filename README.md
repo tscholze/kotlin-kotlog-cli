@@ -4,6 +4,8 @@
 ## tl;dr
 No, I do not think that you wanna use this Kotlin CLI. It is meant as a content creation helper for me needs. But if you find it interessering, awesome!
 
+![](https://github.com/tscholze/kotlin-kotlog-cli/blob/main/docs/kotlog-desc.png?raw=true)
+
 ## Why?
 I was looking for a simple static site blog generator. Jekyll and others were to over powered and too complex for my needs. Besides this, I wanted to have a more depth look into learning Koltin and going back to JetBrains IDEs.
 
