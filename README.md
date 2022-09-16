@@ -28,6 +28,8 @@ java -jar kotlog [...]
  -g: Generates html output
  -p: Publish aka pushes changes to remote
 ```
+## How it looks
+![](https://github.com/tscholze/kotlin-kotlog-cli/blob/main/docs/kotlog-markdown2html.png?raw=true)
 
 ## Features
 - Creating new blog post markdown files
