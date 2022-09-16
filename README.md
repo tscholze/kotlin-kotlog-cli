@@ -13,9 +13,9 @@ Besides this, I wanted to streamline my content creation workflows by letting do
 
 ## Structure
 - `__posts/` - contains all Markdown posts that will be rendered
-- `__templates` - contains all Markdown or html templates that will be used
-- `__styles` - contains all drop-in css style files
-- `__output` - is the regenerated html output directory
+- `__templates/` - contains all Markdown or html templates that will be used
+- `__styles/` - contains all drop-in css style files
+- `__output/` - is the regenerated html output directory
 
 ## Usage
 
