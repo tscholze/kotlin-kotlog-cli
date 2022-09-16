@@ -360,7 +360,7 @@ class Kotlog(args: Array<String>) {
         val cmd1 = "git commit -am '$message'"
         Runtime.getRuntime().exec("git add ${Paths.get("").toAbsolutePath()}/$RELATIVE_OUTPUT_PATH/*")
         Runtime.getRuntime().exec("git add ${Paths.get("").toAbsolutePath()}/$RELATIVE_POSTS_PATH/*")
-        Runtime.getRuntime().exec("git commit -am '$message'")
+        Runtime.getRuntime().exec("git commit -am")
         Runtime.getRuntime().exec("git push origin main")
     }
 
