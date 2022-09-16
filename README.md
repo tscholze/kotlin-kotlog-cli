@@ -9,6 +9,24 @@ I was looking for a simple static site blog generator. Jekyll and others were to
 
 Besides this, I wanted to streamline my content creation workflows by letting do the programm do the heavy lifting in looking for information that are required for the resulting blog post.
 
+## Structure
+- `__posts/` - contains all Markdown posts that will be rendered
+- `__templates` - contains all Markdown or html templates that will be used
+- `__styles` - contains all drop-in css style files
+- `__output` - is the regenerated html output directory
+
+## Usage
+
+Clone the [kotlog-template repository](https://github.com/tscholze/kotlin-kotlog-template) first, than you are ready to run the CLI.
+
+```
+java -jar kotlog [...]
+ -c: 'My awesome title'`: Creates a new blog post
+ -y: beYqB6QXQuY`: Creates a YouTube post
+ -g: Generates html output
+ -p: Publish aka pushes changes to remote
+```
+
 ## Features
 - Creating new blog post markdown files
 - Supports Frontmatter for meta information
