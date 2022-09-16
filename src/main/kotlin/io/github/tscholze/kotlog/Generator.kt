@@ -42,32 +42,32 @@ class Kotlog(args: Array<String>) {
     companion object {
         // MARK: - Constants -
 
-        const val RELATIVE_POSTS_PATH = "__posts"
-        const val RELATIVE_STYLES_PATH = "__styles"
-        const val RELATIVE_OUTPUT_PATH = "__output"
-        const val RELATIVE_TEMPLATES_PATH = "__templates"
+        private const val RELATIVE_POSTS_PATH = "__posts"
+        private const val RELATIVE_STYLES_PATH = "__styles"
+        private const val RELATIVE_OUTPUT_PATH = "__output"
+        private const val RELATIVE_TEMPLATES_PATH = "__templates"
 
         const val DEFAULT_STYLE_NAME = "latex"
         const val DEFAULT_STYLE_OUTPUT_FILENAME = "style.css"
 
-        const val DEFAULT_POST_TEMPLATE_NAME = "post.html"
-        const val DEFAULT_INDEX_TEMPLATE_NAME = "index.html"
-        const val DEFAULT_SNIPPET_TEMPLATE_NAME = "snippet.html"
-        const val DEFAULT_COMPONENT_YOUTUBE_VIDEO_TEMPLATE_NAME = "component_youtube_content.html"
+        private const val DEFAULT_POST_TEMPLATE_NAME = "post.html"
+        private const val DEFAULT_INDEX_TEMPLATE_NAME = "index.html"
+        private const val DEFAULT_SNIPPET_TEMPLATE_NAME = "snippet.html"
+        private const val DEFAULT_COMPONENT_YOUTUBE_VIDEO_TEMPLATE_NAME = "component_youtube_content.html"
 
-        const val DEFAULT_MARKDOWN_POST_TEMPLATE_NAME = "post.md"
+        private const val DEFAULT_MARKDOWN_POST_TEMPLATE_NAME = "post.md"
 
-        const val DEFAULT_JSON_OUTPUT_FILENAME = "posts.json"
-        const val DEFAULT_INDEX_OUTPUT_FILENAME = "index.html"
+        private const val DEFAULT_JSON_OUTPUT_FILENAME = "posts.json"
+        private const val DEFAULT_INDEX_OUTPUT_FILENAME = "index.html"
 
-        const val DEFAULT_DATE_PATTERN = "yyyy-MM-dd"
+        private const val DEFAULT_DATE_PATTERN = "yyyy-MM-dd"
 
         const val MISSING_TEMPLATE_WARNING = "Template not found."
         const val MISSING_FRONT_MATTER_TITLE_WARNING = "MISSING_TEMPLATE_WARNING"
 
         // MARK: - Properties -
 
-        val parser: Parser
+        private val parser: Parser
             get() {
                 val extensions = mutableListOf<Extension>()
                 extensions.add(AutolinkExtension.create())
@@ -90,7 +90,7 @@ class Kotlog(args: Array<String>) {
         //  -> process arguments
         // Else
         // -> print error message and exit
-        if(sanityCheckWithTryRepair()) {
+        if (sanityCheckWithTryRepair()) {
             processCliArguments(args)
         } else {
             printSanityCheckFailedMessage()
@@ -151,11 +151,13 @@ class Kotlog(args: Array<String>) {
     }
 
     private fun processCliOpenMarkdownFile(filename: String) {
-        print("Open Markdown file? (y/n)\n> ")
+        print("Open Markdown file in VSCode? (y/n)\n> ")
         val boolString = readLine()
 
         if (boolString == "y") {
-            Runtime.getRuntime().exec("code $RELATIVE_POSTS_PATH/$filename")
+            shellRun {
+                command("code $RELATIVE_POSTS_PATH/$filename")
+            }
         }
     }
 
@@ -358,7 +360,6 @@ class Kotlog(args: Array<String>) {
 
     private fun pushToRemote() {
         val message = "Content update ${SimpleDateFormat(DEFAULT_DATE_PATTERN).format(Date())}"
-        //Runtime.getRuntime().exec("cd ${Paths.get("").toAbsolutePath()}/")
         shellRun {
             git.commitAllChanges(message)
             git.push("origin", "main")
@@ -372,14 +373,15 @@ class Kotlog(args: Array<String>) {
         var isValid = true
 
         // Check if folders that must have files in it exists.
-        val requiredContentInFolders =
-            listOf(RELATIVE_TEMPLATES_PATH, RELATIVE_STYLES_PATH)
-                .forEach {
-                    val file = File(it)
-                    if (!file.exists() || !file.isDirectory || file.listFiles().isEmpty()) {
-                        isValid = false
-                    }
+        listOf(RELATIVE_TEMPLATES_PATH, RELATIVE_STYLES_PATH)
+            .forEach {
+                val file = File(it)
+                if (!file.exists() || !file.isDirectory || file.listFiles().isEmpty()) {
+                    isValid = false
                 }
+            }
+
+        // Add other checks if needed ...
 
         return isValid
     }
