@@ -37,3 +37,9 @@ data class SnippetConfiguration(
     val title: String,
     val relativeUrl: String
 )
+
+data class YouTubeComponentConfiguration(
+    val title: String,
+    val videoUrl: String,
+    val embedUrl: String
+)

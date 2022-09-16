@@ -3,6 +3,7 @@ package io.github.tscholze.kotlog
 import io.github.tscholze.kotlog.models.BlogConfiguration
 import io.github.tscholze.kotlog.models.PostConfiguration
 import io.github.tscholze.kotlog.models.SnippetConfiguration
+import io.github.tscholze.kotlog.models.YouTubeComponentConfiguration
 import io.github.tscholze.kotlog.utils.toSlug
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
@@ -15,6 +16,7 @@ import org.commonmark.ext.gfm.tables.TablesExtension
 import org.commonmark.parser.Parser
 import org.jsoup.Jsoup
 import java.io.File
+import java.net.URL
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
 import java.util.*
@@ -28,9 +30,17 @@ import kotlin.io.path.writeText
  * of the developer behind this spare time project.
  *
  * @param args CLI arguments which will be processed.
+ *
+ * Possible CLI arguments:
+ *  - `-c 'My awesome title'`: Creates a new blog post
+ *  - `-y beYqB6QXQuY`: Creates a YouTube post
+ *  - `-g`: Generates html output
+ *  - `-p`: Publish aka pushes changes to remote
  */
 class Kotlog(args: Array<String>) {
     companion object {
+        // MARK: - Constants -
+
         const val RELATIVE_POSTS_PATH = "__posts"
         const val RELATIVE_STYLES_PATH = "__styles"
         const val RELATIVE_OUTPUT_PATH = "__output"
@@ -40,51 +50,102 @@ class Kotlog(args: Array<String>) {
         const val DEFAULT_STYLE_OUTPUT_FILENAME = "style.css"
 
         const val DEFAULT_POST_TEMPLATE_NAME = "post.html"
-        const val DEFAULT_SNIPPET_TEMPLATE_NAME = "snippet.html"
         const val DEFAULT_INDEX_TEMPLATE_NAME = "index.html"
+        const val DEFAULT_SNIPPET_TEMPLATE_NAME = "snippet.html"
+        const val DEFAULT_COMPONENT_YOUTUBE_VIDEO_TEMPLATE_NAME = "component_youtube_content.html"
 
         const val DEFAULT_MARKDOWN_POST_TEMPLATE_NAME = "post.md"
 
-        const val DEFAULT_INDEX_OUTPUT_FILENAME = "index.html"
         const val DEFAULT_JSON_OUTPUT_FILENAME = "posts.json"
+        const val DEFAULT_INDEX_OUTPUT_FILENAME = "index.html"
 
         const val DEFAULT_DATE_PATTERN = "yyyy-MM-dd"
 
         const val MISSING_TEMPLATE_WARNING = "Template not found."
         const val MISSING_FRONT_MATTER_TITLE_WARNING = "MISSING_TEMPLATE_WARNING"
 
-        val parser: Parser get() {
-            val extensions = mutableListOf<Extension>()
-            extensions.add(AutolinkExtension.create())
-            extensions.add(YamlFrontMatterExtension.create())
-            extensions.add(TablesExtension.create())
+        // MARK: - Properties -
 
-            // Build parser
-            return Parser.builder()
-                .extensions(extensions)
-                .build()
-        }
+        val parser: Parser
+            get() {
+                val extensions = mutableListOf<Extension>()
+                extensions.add(AutolinkExtension.create())
+                extensions.add(YamlFrontMatterExtension.create())
+                extensions.add(TablesExtension.create())
+
+                // Build parser
+                return Parser.builder()
+                    .extensions(extensions)
+                    .build()
+            }
     }
 
     // MARK: - Init -
 
     init {
-        processCliArguments(args)
+        // Perform sanity check.
+        //
+        // If successful
+        //  -> process arguments
+        // Else
+        // -> print error message and exit
+        if(sanityCheckWithTryRepair()) {
+            processCliArguments(args)
+        } else {
+            printSanityCheckFailedMessage()
+        }
     }
 
     // MARK: - CLI -
 
     private fun processCliArguments(args: Array<String>) {
         val parser = ArgParser("Kotlog - Blog generator")
-        val title by parser.option(ArgType.String, shortName = "c", description = "Create new post with given title")
-        val generate by parser.option(ArgType.Boolean, shortName = "g", description = "Generate blog")
+
+        val title by parser.option(
+            ArgType.String,
+            shortName = "c",
+            description = "Create new post with given title"
+        )
+
+        val youtubeId by parser.option(
+            ArgType.String,
+            shortName = "y",
+            description = "Creates a new post for given YT video id"
+        )
+
+        val generate by parser.option(
+            ArgType.Boolean, shortName = "g",
+            description = "Generate blog content"
+        )
+
+        val publish by parser.option(
+            ArgType.Boolean, shortName = "p",
+            description = "Publishes the current state of the blog"
+        )
+
         parser.parse(args)
 
         // Evaluate CLI arguments
-        if (title != null && title?.isNotBlank() == true) {
-            generateMarkdownPost(title!!)
-        } else if (generate == true) {
-            generate(BlogConfiguration("Tobias Scholze | The Stuttering Nerd"))
+        when {
+            // Check if a title is set -> create new post
+            title != null && title?.isNotBlank() == true -> {
+                generateMarkdownPost(title!!)
+            }
+
+            // Checks if -y is set -> Create new YouTube post
+            youtubeId != null && youtubeId?.isNotBlank() == true -> {
+                generateMarkdownYoutubePost(youtubeId!!)
+            }
+
+            // Check if -g is set -> Generate html
+            generate == true -> {
+                generate(BlogConfiguration("Tobias Scholze | The Stuttering Nerd"))
+            }
+
+            // Check if -p is set -> Publish html
+            publish == true -> {
+                pushToRemote()
+            }
         }
     }
 
@@ -92,21 +153,30 @@ class Kotlog(args: Array<String>) {
         print("Open Markdown file? (y/n)\n> ")
         val boolString = readLine()
 
-        if(boolString == "y") {
+        if (boolString == "y") {
             Runtime.getRuntime().exec("code $RELATIVE_POSTS_PATH/$filename")
+        }
+    }
+
+    private fun processCliPublishOutput() {
+        print("Do you want to publish the changes? (y/n)\n> ")
+        val boolString = readLine()
+
+        if (boolString == "y") {
+            pushToRemote()
         }
     }
 
     // MARK: - Generators -
 
-    private fun generate(configuration: BlogConfiguration): Boolean {
+    private fun generate(configuration: BlogConfiguration) {
         // 1. Clean existing output if needed.
         if (configuration.alwaysClean) {
             cleanOutput()
         }
 
         // 2. Generate posts
-        generatePosts()
+        generateHtmlPosts()
 
         // 3. Generate landing page
         generateIndex(configuration)
@@ -120,24 +190,35 @@ class Kotlog(args: Array<String>) {
         // 6. Print command to open output
         printOutputFilePath()
 
-        // 7. Return true if generation was successful.
-        return true
+        // 7. Ask the user if changes should be published
+        processCliPublishOutput()
     }
 
-    private fun generateMarkdownPost(title: String) {
+    private fun generateMarkdownPost(title: String, content: String? = null) {
         val template = readFromTemplates(DEFAULT_MARKDOWN_POST_TEMPLATE_NAME)
         val dateString = SimpleDateFormat(DEFAULT_DATE_PATTERN).format(Date())
         val filename = "$dateString-${title.toSlug()}.md"
         val markdown = template
             .replace("{{title}}", title)
             .replace("{{date}}", dateString)
+            .replace("{{content}}", content ?: "Your content")
 
         writeToPosts(filename, markdown)
         printNewPostMessage(filename)
         processCliOpenMarkdownFile(filename)
     }
 
-    private fun generatePosts() {
+    private fun generateMarkdownYoutubePost(videoId: String) {
+        val videoUrl = "https://www.youtube.com/watch?v=$videoId"
+        val embedUrl = "https://www.youtube.com/embed/$videoId"
+        val title = Jsoup.parse(URL(videoUrl), 3000).title()
+        val configuration = YouTubeComponentConfiguration(title, videoUrl, embedUrl)
+        val content = inflateComponentYouTubeContent(configuration)
+
+        generateMarkdownPost(title, content)
+    }
+
+    private fun generateHtmlPosts() {
         File(RELATIVE_POSTS_PATH)
             .walk()
             .filter { it.extension == "md" }
@@ -191,6 +272,14 @@ class Kotlog(args: Array<String>) {
         println("")
     }
 
+    private fun printSanityCheckFailedMessage() {
+        println("")
+        println("Error!")
+        println("One ore more folders with required content are missing.")
+        println("Please check the template and style folder for its existence and content.")
+        println("")
+    }
+
     // MARK: - Cleaning helper -
 
     private fun cleanOutput() {
@@ -201,16 +290,23 @@ class Kotlog(args: Array<String>) {
 
     // MARK: - Inflaters -
 
-    private fun inflateSnippetTemplate(snippetConfiguration: SnippetConfiguration): String {
+    private fun inflateSnippetTemplate(configuration: SnippetConfiguration): String {
         return readFromTemplates(DEFAULT_SNIPPET_TEMPLATE_NAME)
-            .replace("{{title}}", snippetConfiguration.title)
-            .replace("{{relative_url}}", snippetConfiguration.relativeUrl)
+            .replace("{{title}}", configuration.title)
+            .replace("{{relative_url}}", configuration.relativeUrl)
     }
 
-    private fun inflatePostTemplate(postConfiguration: PostConfiguration): String {
+    private fun inflatePostTemplate(configuration: PostConfiguration): String {
         return readFromTemplates(DEFAULT_POST_TEMPLATE_NAME)
-            .replace("{{title}}", postConfiguration.title)
-            .replace("{{content}}", postConfiguration.innerHtml)
+            .replace("{{title}}", configuration.title)
+            .replace("{{content}}", configuration.innerHtml)
+    }
+
+    private fun inflateComponentYouTubeContent(configuration: YouTubeComponentConfiguration): String {
+        return readFromTemplates(DEFAULT_COMPONENT_YOUTUBE_VIDEO_TEMPLATE_NAME)
+            .replace("{{title}}", configuration.title)
+            .replace("{{youtube_url}}", configuration.videoUrl)
+            .replace("{{embed_url}}", configuration.embedUrl)
     }
 
     // MARK: - File access -
@@ -255,5 +351,33 @@ class Kotlog(args: Array<String>) {
             newFile.createNewFile()
             newFile.writeText(input)
         }
+    }
+
+    // MARK: - Git -
+
+    private fun pushToRemote() {
+        val message = "Content update ${SimpleDateFormat(DEFAULT_DATE_PATTERN).format(Date())}"
+        Runtime.getRuntime().exec("cd $RELATIVE_OUTPUT_PATH")
+        Runtime.getRuntime().exec("git add .")
+        Runtime.getRuntime().exec("git commit -m '$message'")
+        Runtime.getRuntime().exec("git push")
+    }
+
+    // MARK: - Sanity checks -
+
+    private fun sanityCheckWithTryRepair(): Boolean {
+        var isValid = true
+
+        // Check if folders that must have files in it exists.
+        val requiredContentInFolders =
+            listOf(RELATIVE_TEMPLATES_PATH, RELATIVE_STYLES_PATH)
+                .forEach {
+                    val file = File(it)
+                    if (!file.exists() || !file.isDirectory || file.listFiles().isEmpty()) {
+                        isValid = false
+                    }
+                }
+
+        return isValid
     }
 }
