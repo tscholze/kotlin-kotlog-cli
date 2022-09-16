@@ -9,7 +9,7 @@ import org.commonmark.renderer.html.HtmlRenderer
 data class BlogConfiguration(
     val title: String,
     val styleName: String = Kotlog.DEFAULT_STYLE_NAME,
-    val alwaysClean: Boolean = false,
+    val alwaysClean: Boolean = true,
 )
 
 class PostConfiguration(
