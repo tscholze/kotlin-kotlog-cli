@@ -84,13 +84,18 @@ class Kotlog(args: Array<String>) {
     // MARK: - Init -
 
     init {
-        // Perform sanity check.
-        //
-        // If successful
-        //  -> process arguments
-        // Else
-        // -> print error message and exit
-        if (sanityCheckWithTryRepair()) {
+        // Greet the user
+        printGreeting()
+
+        // 1. Ensure at least one cli argument is given
+        //      -> if not, print help message
+        // 2. Perform sanity check.
+        //      -> if not, print error message
+        // 3. Process cli arguments
+        if(args.isEmpty()) {
+            printHelp()
+        }
+        else if (sanityCheckRequiredFoldersAndFiles()) {
             processCliArguments(args)
         } else {
             printSanityCheckFailedMessage()
@@ -260,6 +265,21 @@ class Kotlog(args: Array<String>) {
 
     // MARK: - Pretty Prints -
 
+    private fun printGreeting() {
+        println("")
+        println("Welcome to Kotlog <3")
+        println("")
+    }
+
+    private fun printHelp() {
+        println("No arguments given.")
+        println("Please specify an argument what you want to do.")
+        println("    -c 'My awesome title' : To create a new Markdown post")
+        println("    -y 'xcg24fa' : To create a new YouTube video Markdown post")
+        println("    -g : To generate output files")
+        println("    -p : To publish output files")
+    }
+
     private fun printOutputFilePath() {
         println("")
         println("Html has been generated to folder:")
@@ -369,7 +389,7 @@ class Kotlog(args: Array<String>) {
 
     // MARK: - Sanity checks -
 
-    private fun sanityCheckWithTryRepair(): Boolean {
+    private fun sanityCheckRequiredFoldersAndFiles(): Boolean {
         var isValid = true
 
         // Check if folders that must have files in it exists.
