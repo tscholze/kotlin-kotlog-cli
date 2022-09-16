@@ -51,3 +51,7 @@ The app is built on the work of giants. Without the following folks, repositorie
 - [David Herman (bitspittle)](https://github.com/bitspittle) - one of the most aspiring Kotlin educator and developer of Kobweb
 - [Marcel Reiter (MarcelReiter)](https://github.com/MarcelReiter) - an awesome colleage and for never being tired of my beginners questions
 - [Liam Doherty (dohliam)](https://github.com/dohliam/dropin-minimal-css#theme-collections) for curating the drop-in css collection which is used as `style` in the app
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Dependencies or assets maybe licensed differently.
