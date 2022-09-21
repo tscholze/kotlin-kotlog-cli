@@ -194,7 +194,7 @@ class Kotlog(args: Array<String>) {
         generateHtmlStyle(configuration.styleName)
 
         // 5. Generate Json
-        generateJson()
+        generateJsonFeed()
 
         // 6. Print command to open output
         printOutputFilePath()
@@ -253,7 +253,7 @@ class Kotlog(args: Array<String>) {
         writeToOutput(DEFAULT_INDEX_OUTPUT_FILENAME, html)
     }
 
-    private fun generateJson() {
+    private fun generateJsonFeed() {
         val json = Json.encodeToString(readSnippetConfigurations())
         writeToOutput(DEFAULT_JSON_OUTPUT_FILENAME, json)
     }
