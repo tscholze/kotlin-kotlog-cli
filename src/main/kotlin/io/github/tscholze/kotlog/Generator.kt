@@ -340,6 +340,7 @@ class Kotlog(args: Array<String>) {
         return File(RELATIVE_OUTPUT_PATH)
             .walk()
             .filter { it.extension == "html" }
+            .sortedBy { it.name }
             .map { SnippetConfiguration(Jsoup.parse(it.readText()).title(), it.name) }
             .toList()
     }
