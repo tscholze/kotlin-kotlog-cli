@@ -30,7 +30,8 @@ import kotlin.io.path.writeText
  * Kotlog represents a static side generator which is tailored to the use case
  * of the developer behind this spare time project.
  *
- * @param args CLI arguments which will be processed.
+ * @param args CLI arguments which will be processed
+ * @param configuration Blog configuration
  *
  * Possible CLI arguments:
  *  - `-c 'My awesome title'`: Creates a new blog post
@@ -38,7 +39,7 @@ import kotlin.io.path.writeText
  *  - `-g`: Generates html output
  *  - `-p`: Publish aka pushes changes to remote
  */
-class Kotlog(args: Array<String>) {
+class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     companion object {
         // MARK: - Constants -
 
@@ -81,9 +82,23 @@ class Kotlog(args: Array<String>) {
             }
     }
 
+    // MARK: - Private properties -
+
+    private val configuration: BlogConfiguration
+
     // MARK: - Init -
 
     init {
+        // Set configuration
+        this.configuration = configuration
+
+        // Run generator
+        run(args)
+    }
+
+    // MARK: - Run -
+
+    private fun run(args: Array<String>) {
         // Greet the user
         printGreeting()
 
@@ -145,7 +160,7 @@ class Kotlog(args: Array<String>) {
 
             // Check if -g is set -> Generate html
             generate == true -> {
-                generate(BlogConfiguration("Tobias Scholze | The Stuttering Nerd"))
+                generate()
             }
 
             // Check if -p is set -> Publish html
@@ -178,11 +193,9 @@ class Kotlog(args: Array<String>) {
 
     // MARK: - Generators -
 
-    private fun generate(configuration: BlogConfiguration) {
-        // 1. Clean existing output if needed.
-        if (configuration.alwaysClean) {
-            cleanOutput()
-        }
+    private fun generate() {
+        // 1. Clean existing output.
+        cleanOutput()
 
         // 2. Generate posts
         generateHtmlPosts()
@@ -246,7 +259,7 @@ class Kotlog(args: Array<String>) {
             .joinToString("~") { inflateSnippetTemplate(it) }
 
         val html = readFromTemplates(DEFAULT_INDEX_TEMPLATE_NAME)
-            .replace("{{title}}", blogConfiguration.title)
+            .replace("{{title}}", blogConfiguration.titleText)
             .replace("{{content}}", content)
 
         // Write file

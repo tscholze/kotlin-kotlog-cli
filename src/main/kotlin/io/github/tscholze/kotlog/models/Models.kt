@@ -9,14 +9,13 @@ import org.commonmark.renderer.html.HtmlRenderer
 /**
  * Defines the blog layout
  *
- * @property title Title of the blog
+ * @property titleText Title of the blog
  * @property styleName: Name of the applied CSS theme. Default: latex
- * @property alwaysClean: If true, the output will always be cleaned before creating new files.
  */
 data class BlogConfiguration(
-    val title: String,
-    val styleName: String = Kotlog.DEFAULT_STYLE_NAME,
-    val alwaysClean: Boolean = true,
+    val titleText: String,
+    val footerText: String,
+    val styleName: String = Kotlog.DEFAULT_STYLE_NAME
 )
 
 /**
