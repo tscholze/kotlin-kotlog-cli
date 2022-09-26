@@ -31,14 +31,15 @@ import kotlin.io.path.writeText
  * Possible CLI arguments:
  *  - `-c 'My awesome title'`: Creates a new blog post
  *  - `-y beYqB6QXQuY`: Creates a YouTube post
- *  - `-g`: Generates html output
- *  - `-p`: Publish aka pushes changes to remote
+ *  - `-g` : Generates html output
+ *  - `-p` : Publish aka pushes changes to remote
+ *  - `-co`: To publish output files
  */
 class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     companion object {
         // MARK: - Internal constants -
 
-        internal const val DEFAULT_DATE_PATTERN = "yyyy-MM-dd"
+        internal const val DATE_PATTERN = "yyyy-MM-dd"
         internal const val MISSING_TEMPLATE_WARNING = "Template not found."
         internal const val MISSING_FRONT_MATTER_TITLE_WARNING = "MISSING_TEMPLATE_WARNING"
 
@@ -48,13 +49,16 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         private const val RELATIVE_STYLES_PATH = "__styles"
         private const val RELATIVE_OUTPUT_PATH = "__output"
         private const val RELATIVE_TEMPLATES_PATH = "__templates"
-        private const val DEFAULT_POST_TEMPLATE_NAME = "post.html"
-        private const val DEFAULT_INDEX_TEMPLATE_NAME = "index.html"
-        private const val DEFAULT_SNIPPET_TEMPLATE_NAME = "snippet.html"
-        private const val DEFAULT_COMPONENT_YOUTUBE_VIDEO_TEMPLATE_NAME = "component_youtube_content.html"
-        private const val DEFAULT_MARKDOWN_POST_TEMPLATE_NAME = "post.md"
-        private const val DEFAULT_JSON_OUTPUT_FILENAME = "posts.json"
-        private const val DEFAULT_INDEX_OUTPUT_FILENAME = "index.html"
+
+        private const val POST_TEMPLATE_FILENAME = "post.html"
+        private const val INDEX_TEMPLATE_FILENAME = "index.html"
+        private const val SNIPPET_TEMPLATE_FILENAME = "snippet.html"
+        private const val COMPONENT_YOUTUBE_VIDEO_TEMPLATE_FILENAME = "component_youtube_content.html"
+        private const val JSON_OUTPUT_FILENAME = "posts.json"
+        private const val INDEX_OUTPUT_FILENAME = "index.html"
+        private const val MARKDOWN_POST_TEMPLATE_FILENAME = "post.md"
+
+        private val REQUIRED_FOLDERS = listOf(RELATIVE_TEMPLATES_PATH, RELATIVE_STYLES_PATH)
         private val EMBEDDED_FILENAMES = listOf("style.css","apple-touch-icon.png","favicon.ico", "icon.svg")
     }
 
@@ -182,8 +186,8 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     // MARK: - Generators -
 
     private fun generateMarkdownPost(title: String, content: String? = null) {
-        val template = readFromTemplates(DEFAULT_MARKDOWN_POST_TEMPLATE_NAME)
-        val dateString = SimpleDateFormat(DEFAULT_DATE_PATTERN).format(Date())
+        val template = readFromTemplates(MARKDOWN_POST_TEMPLATE_FILENAME)
+        val dateString = SimpleDateFormat(DATE_PATTERN).format(Date())
         val filename = "$dateString-${title.toSlug()}.md"
         val markdown = template
             .replace("{{title}}", title)
@@ -250,18 +254,18 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
             .reversed()
             .joinToString("~") { inflateSnippetTemplate(it) }
 
-        val html = readFromTemplates(DEFAULT_INDEX_TEMPLATE_NAME)
+        val html = readFromTemplates(INDEX_TEMPLATE_FILENAME)
             .replace("{{title}}", configuration.titleText)
             .replace("{{content}}", content)
             .replace("{{archived_content}}", archivedContent)
 
         // Write file
-        writeToOutput(DEFAULT_INDEX_OUTPUT_FILENAME, html)
+        writeToOutput(INDEX_OUTPUT_FILENAME, html)
     }
 
     private fun generateJsonFeed(configurations: List<SnippetConfiguration>) {
         val json = Json.encodeToString(configurations)
-        writeToOutput(DEFAULT_JSON_OUTPUT_FILENAME, json)
+        writeToOutput(JSON_OUTPUT_FILENAME, json)
     }
 
     private fun embedStyling() {
@@ -274,7 +278,6 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     private fun printGreeting() {
         println("")
         println("Welcome to Kotlog <3")
-        println("")
     }
 
     private fun printHelp() {
@@ -322,19 +325,19 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     // MARK: - Inflaters -
 
     private fun inflateSnippetTemplate(configuration: SnippetConfiguration): String {
-        return readFromTemplates(DEFAULT_SNIPPET_TEMPLATE_NAME)
+        return readFromTemplates(SNIPPET_TEMPLATE_FILENAME)
             .replace("{{title}}", configuration.title)
             .replace("{{relative_url}}", configuration.relativeUrl)
     }
 
     private fun inflatePostTemplate(configuration: PostConfiguration): String {
-        return readFromTemplates(DEFAULT_POST_TEMPLATE_NAME)
+        return readFromTemplates(POST_TEMPLATE_FILENAME)
             .replace("{{title}}", configuration.title)
             .replace("{{content}}", configuration.innerHtml)
     }
 
     private fun inflateComponentYouTubeContent(configuration: YouTubeComponentConfiguration): String {
-        return readFromTemplates(DEFAULT_COMPONENT_YOUTUBE_VIDEO_TEMPLATE_NAME)
+        return readFromTemplates(COMPONENT_YOUTUBE_VIDEO_TEMPLATE_FILENAME)
             .replace("{{title}}", configuration.title)
             .replace("{{youtube_url}}", configuration.videoUrl)
             .replace("{{embed_url}}", configuration.embedUrl)
@@ -385,7 +388,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     // MARK: - Git -
 
     private fun pushToRemote() {
-        val message = "Content update ${SimpleDateFormat(DEFAULT_DATE_PATTERN).format(Date())}"
+        val message = "Content update ${SimpleDateFormat(DATE_PATTERN).format(Date())}"
         shellRun {
             git.commitAllChanges(message)
             git.push("origin", "main")
@@ -399,7 +402,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         var isValid = true
 
         // Check if folders that must have files in it exists.
-        listOf(RELATIVE_TEMPLATES_PATH, RELATIVE_STYLES_PATH)
+        REQUIRED_FOLDERS
             .forEach {
                 val file = File(it)
                 if (!file.exists() || !file.isDirectory || file.listFiles().isEmpty()) {

@@ -82,7 +82,7 @@ class PostConfiguration(
             }
             val date =  LocalDate.parse(
                 dateString,
-                DateTimeFormatter.ofPattern(Kotlog.DEFAULT_DATE_PATTERN)
+                DateTimeFormatter.ofPattern(Kotlog.DATE_PATTERN)
             )
 
             // Generate inner html string
