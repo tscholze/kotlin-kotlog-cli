@@ -1,7 +1,6 @@
 package io.github.tscholze.kotlog.models
 
 import io.github.tscholze.kotlog.Kotlog
-import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.Serializable
 import org.commonmark.Extension
 import org.commonmark.ext.autolink.AutolinkExtension
@@ -17,13 +16,12 @@ import java.time.format.DateTimeFormatter
 /**
  * Defines the blog layout
  *
- * @property titleText Title of the blog
- * @property styleName: Name of the applied CSS theme. Default: latex
+ * @property titleText Title (Header) of the blog
+ * @property footerText Footer text of the blog
  */
 data class BlogConfiguration(
     val titleText: String,
-    val footerText: String,
-    val styleName: String = Kotlog.DEFAULT_STYLE_NAME
+    val footerText: String
 )
 
 /**

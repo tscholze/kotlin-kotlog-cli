@@ -10,11 +10,6 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.commonmark.Extension
-import org.commonmark.ext.autolink.AutolinkExtension
-import org.commonmark.ext.front.matter.YamlFrontMatterExtension
-import org.commonmark.ext.gfm.tables.TablesExtension
-import org.commonmark.parser.Parser
 import org.jsoup.Jsoup
 import java.io.File
 import java.net.URL
@@ -46,8 +41,6 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         internal const val DEFAULT_DATE_PATTERN = "yyyy-MM-dd"
         internal const val MISSING_TEMPLATE_WARNING = "Template not found."
         internal const val MISSING_FRONT_MATTER_TITLE_WARNING = "MISSING_TEMPLATE_WARNING"
-        internal const val DEFAULT_STYLE_NAME = "latex"
-        internal const val DEFAULT_STYLE_OUTPUT_FILENAME = "style.css"
 
         // MARK: - Private constants -
 
@@ -62,6 +55,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         private const val DEFAULT_MARKDOWN_POST_TEMPLATE_NAME = "post.md"
         private const val DEFAULT_JSON_OUTPUT_FILENAME = "posts.json"
         private const val DEFAULT_INDEX_OUTPUT_FILENAME = "index.html"
+        private val EMBEDDED_FILENAMES = listOf("style.css","apple-touch-icon.png","favicon.ico", "icon.svg")
     }
 
     // MARK: - Private properties -
@@ -117,13 +111,20 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         )
 
         val generate by parser.option(
-            ArgType.Boolean, shortName = "g",
+            ArgType.Boolean,
+            shortName = "g",
             description = "Generate blog content"
         )
 
         val publish by parser.option(
-            ArgType.Boolean, shortName = "p",
+            ArgType.Boolean,
+            shortName = "p",
             description = "Publishes the current state of the blog"
+        )
+
+        val clean by parser.option(
+            ArgType.Boolean, shortName = "co",
+            description = "Cleans the output directory"
         )
 
         parser.parse(args)
@@ -148,6 +149,11 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
             // Check if -p is set -> Publish html
             publish == true -> {
                 pushToRemote()
+            }
+
+            // Check if -co is set -> Clean output
+            clean == true -> {
+                cleanOutput()
             }
         }
     }
@@ -218,7 +224,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         generateIndex(snippets)
 
         // 4. Copy styles
-        generateHtmlStyle()
+        embedStyling()
 
         // 5. Transform configurations to feed
         generateJsonFeed(snippets)
@@ -258,11 +264,9 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         writeToOutput(DEFAULT_JSON_OUTPUT_FILENAME, json)
     }
 
-    private fun generateHtmlStyle() {
-        val file = File("$RELATIVE_STYLES_PATH/${configuration.styleName}.css")
-        if (!file.exists()) return
-        val style = file.readText()
-        writeToOutput(DEFAULT_STYLE_OUTPUT_FILENAME, style)
+    private fun embedStyling() {
+        EMBEDDED_FILENAMES
+            .forEach { copyFile("$RELATIVE_STYLES_PATH/$it", RELATIVE_OUTPUT_PATH) }
     }
 
     // MARK: - Pretty Prints -
@@ -368,6 +372,12 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
             val newFile = path.toFile()
             newFile.createNewFile()
             newFile.writeText(input)
+        }
+    }
+
+    private fun copyFile(fromFilePath: String, toFilePath: String) {
+        shellRun {
+            command("cp", listOf("-f", fromFilePath, toFilePath))
         }
     }
 
