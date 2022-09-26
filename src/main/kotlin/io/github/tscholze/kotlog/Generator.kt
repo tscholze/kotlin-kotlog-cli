@@ -41,45 +41,27 @@ import kotlin.io.path.writeText
  */
 class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     companion object {
-        // MARK: - Constants -
+        // MARK: - Internal constants -
+
+        internal const val DEFAULT_DATE_PATTERN = "yyyy-MM-dd"
+        internal const val MISSING_TEMPLATE_WARNING = "Template not found."
+        internal const val MISSING_FRONT_MATTER_TITLE_WARNING = "MISSING_TEMPLATE_WARNING"
+        internal const val DEFAULT_STYLE_NAME = "latex"
+        internal const val DEFAULT_STYLE_OUTPUT_FILENAME = "style.css"
+
+        // MARK: - Private constants -
 
         private const val RELATIVE_POSTS_PATH = "__posts"
         private const val RELATIVE_STYLES_PATH = "__styles"
         private const val RELATIVE_OUTPUT_PATH = "__output"
         private const val RELATIVE_TEMPLATES_PATH = "__templates"
-
-        const val DEFAULT_STYLE_NAME = "latex"
-        const val DEFAULT_STYLE_OUTPUT_FILENAME = "style.css"
-
         private const val DEFAULT_POST_TEMPLATE_NAME = "post.html"
         private const val DEFAULT_INDEX_TEMPLATE_NAME = "index.html"
         private const val DEFAULT_SNIPPET_TEMPLATE_NAME = "snippet.html"
         private const val DEFAULT_COMPONENT_YOUTUBE_VIDEO_TEMPLATE_NAME = "component_youtube_content.html"
-
         private const val DEFAULT_MARKDOWN_POST_TEMPLATE_NAME = "post.md"
-
         private const val DEFAULT_JSON_OUTPUT_FILENAME = "posts.json"
         private const val DEFAULT_INDEX_OUTPUT_FILENAME = "index.html"
-
-        private const val DEFAULT_DATE_PATTERN = "yyyy-MM-dd"
-
-        const val MISSING_TEMPLATE_WARNING = "Template not found."
-        const val MISSING_FRONT_MATTER_TITLE_WARNING = "MISSING_TEMPLATE_WARNING"
-
-        // MARK: - Properties -
-
-        private val parser: Parser
-            get() {
-                val extensions = mutableListOf<Extension>()
-                extensions.add(AutolinkExtension.create())
-                extensions.add(YamlFrontMatterExtension.create())
-                extensions.add(TablesExtension.create())
-
-                // Build parser
-                return Parser.builder()
-                    .extensions(extensions)
-                    .build()
-            }
     }
 
     // MARK: - Private properties -
@@ -160,7 +142,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
 
             // Check if -g is set -> Generate html
             generate == true -> {
-                generate()
+                generateHtmlOutput()
             }
 
             // Check if -p is set -> Publish html
@@ -193,29 +175,6 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
 
     // MARK: - Generators -
 
-    private fun generate() {
-        // 1. Clean existing output.
-        cleanOutput()
-
-        // 2. Generate posts
-        generateHtmlPosts()
-
-        // 3. Generate landing page
-        generateIndex(configuration)
-
-        // 4. Copy style
-        generateHtmlStyle(configuration.styleName)
-
-        // 5. Generate Json
-        generateJsonFeed()
-
-        // 6. Print command to open output
-        printOutputFilePath()
-
-        // 7. Ask the user if changes should be published
-        processCliPublishOutput()
-    }
-
     private fun generateMarkdownPost(title: String, content: String? = null) {
         val template = readFromTemplates(DEFAULT_MARKDOWN_POST_TEMPLATE_NAME)
         val dateString = SimpleDateFormat(DEFAULT_DATE_PATTERN).format(Date())
@@ -223,7 +182,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         val markdown = template
             .replace("{{title}}", title)
             .replace("{{date}}", dateString)
-            .replace("{{content}}", content ?: "Your content")
+            .replace("{{content}}", content ?: "Your content goes here")
 
         writeToPosts(filename, markdown)
         printNewPostMessage(filename)
@@ -240,39 +199,67 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         generateMarkdownPost(title, content)
     }
 
-    private fun generateHtmlPosts() {
-        File(RELATIVE_POSTS_PATH)
+    private fun generateHtmlOutput() {
+        // 1. Get configurations from markdown files
+        val configurations = File(RELATIVE_POSTS_PATH)
             .walk()
             .filter { it.extension == "md" }
-            .forEach {
-                val configuration = PostConfiguration.fromNode(parser.parse(it.readText()))
-                val content = inflatePostTemplate(configuration)
-                val filename = "${it.nameWithoutExtension}.html"
-                writeToOutput(filename, content)
-            }
+            .map { PostConfiguration.fromFile(it) }
+
+        val snippets = configurations
+            .map { SnippetConfiguration.from(it) }
+            .toList()
+
+        // 2. Transform configurations to html posts
+        configurations
+            .forEach { writeToOutput(it.filename, inflatePostTemplate(it)) }
+
+        // 3. Transform configurations to html index
+        generateIndex(snippets)
+
+        // 4. Copy styles
+        generateHtmlStyle()
+
+        // 5. Transform configurations to feed
+        generateJsonFeed(snippets)
+
+        // 6. Print command to open output
+        printOutputFilePath()
+
+        // 7. Ask the user if changes should be published
+        processCliPublishOutput()
     }
 
-    private fun generateIndex(blogConfiguration: BlogConfiguration) {
+    private fun generateIndex(configurations: List<SnippetConfiguration>) {
         // Create index file
-        val content = readSnippetConfigurations()
+        val content = configurations
+            .filter { it.primaryTag.lowercase() != "archive" }
+            .sortedBy { it.relativeUrl }
+            .reversed()
+            .joinToString("~") { inflateSnippetTemplate(it) }
+
+        val archivedContent = configurations
+            .filter { it.primaryTag.lowercase() == "archive" }
+            .sortedBy { it.relativeUrl }
             .reversed()
             .joinToString("~") { inflateSnippetTemplate(it) }
 
         val html = readFromTemplates(DEFAULT_INDEX_TEMPLATE_NAME)
-            .replace("{{title}}", blogConfiguration.titleText)
+            .replace("{{title}}", configuration.titleText)
             .replace("{{content}}", content)
+            .replace("{{archived_content}}", archivedContent)
 
         // Write file
         writeToOutput(DEFAULT_INDEX_OUTPUT_FILENAME, html)
     }
 
-    private fun generateJsonFeed() {
-        val json = Json.encodeToString(readSnippetConfigurations())
+    private fun generateJsonFeed(configurations: List<SnippetConfiguration>) {
+        val json = Json.encodeToString(configurations)
         writeToOutput(DEFAULT_JSON_OUTPUT_FILENAME, json)
     }
 
-    private fun generateHtmlStyle(styleName: String) {
-        val file = File("$RELATIVE_STYLES_PATH/$styleName.css")
+    private fun generateHtmlStyle() {
+        val file = File("$RELATIVE_STYLES_PATH/${configuration.styleName}.css")
         if (!file.exists()) return
         val style = file.readText()
         writeToOutput(DEFAULT_STYLE_OUTPUT_FILENAME, style)
@@ -323,6 +310,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     private fun cleanOutput() {
         File(RELATIVE_OUTPUT_PATH)
             .walk()
+            .filter { it.nameWithoutExtension != "assets" }
             .forEach { it.delete() }
     }
 
@@ -348,15 +336,6 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     }
 
     // MARK: - File access -
-
-    private fun readSnippetConfigurations(): List<SnippetConfiguration> {
-        return File(RELATIVE_OUTPUT_PATH)
-            .walk()
-            .filter { it.extension == "html" }
-            .sortedBy { it.name }
-            .map { SnippetConfiguration(Jsoup.parse(it.readText()).title(), it.name) }
-            .toList()
-    }
 
     private fun readFromTemplates(filename: String): String {
         val file = File("$RELATIVE_TEMPLATES_PATH/$filename")
