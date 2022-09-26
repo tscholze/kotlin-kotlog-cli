@@ -202,7 +202,12 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     private fun generateMarkdownYoutubePost(videoId: String) {
         val videoUrl = "https://www.youtube.com/watch?v=$videoId"
         val embedUrl = "https://www.youtube.com/embed/$videoId"
-        val title = Jsoup.parse(URL(videoUrl), 3000).title()
+        val dom = Jsoup.parse(URL(videoUrl), 3000)
+        val title = dom.title()
+
+        // YouTube hides DOM elements if they are requested not by a browser
+        // We have to figure out how to get the content description of a video.
+
         val configuration = YouTubeComponentConfiguration(title, videoUrl, embedUrl)
         val content = inflateComponentYouTubeContent(configuration)
 
