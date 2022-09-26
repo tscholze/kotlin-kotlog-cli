@@ -278,12 +278,13 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     }
 
     private fun printHelp() {
-        println("No arguments given.")
+        println("ERROR: No arguments given.")
         println("Please specify an argument what you want to do.")
-        println("    -c 'My awesome title' : To create a new Markdown post")
-        println("    -y 'xcg24fa' : To create a new YouTube video Markdown post")
+        println("    -c : 'My awesome title' : To create a new Markdown post")
+        println("    -y : 'xcg24fa' : To create a new YouTube video Markdown post")
         println("    -g : To generate output files")
         println("    -p : To publish output files")
+        println("    -co: To publish output files")
     }
 
     private fun printOutputFilePath() {
