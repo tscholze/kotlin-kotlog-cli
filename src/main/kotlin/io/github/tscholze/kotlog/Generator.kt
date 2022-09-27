@@ -5,6 +5,9 @@ import io.github.tscholze.kotlog.models.BlogConfiguration
 import io.github.tscholze.kotlog.models.PostConfiguration
 import io.github.tscholze.kotlog.models.SnippetConfiguration
 import io.github.tscholze.kotlog.models.YouTubeComponentConfiguration
+import io.github.tscholze.kotlog.templates.components.EmbeddedYouTubeVideo
+import io.github.tscholze.kotlog.templates.html.Index
+import io.github.tscholze.kotlog.templates.html.Post
 import io.github.tscholze.kotlog.utils.toSlug
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
@@ -14,7 +17,7 @@ import org.jsoup.Jsoup
 import java.io.File
 import java.net.URL
 import java.nio.file.Paths
-import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectory
@@ -39,26 +42,18 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     companion object {
         // MARK: - Internal constants -
 
-        internal const val DATE_PATTERN = "yyyy-MM-dd"
-        internal const val MISSING_TEMPLATE_WARNING = "Template not found."
-        internal const val MISSING_FRONT_MATTER_TITLE_WARNING = "MISSING_TEMPLATE_WARNING"
+        val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")!!
 
         // MARK: - Private constants -
 
         private const val RELATIVE_POSTS_PATH = "__posts"
         private const val RELATIVE_STYLES_PATH = "__styles"
         private const val RELATIVE_OUTPUT_PATH = "__output"
-        private const val RELATIVE_TEMPLATES_PATH = "__templates"
 
-        private const val POST_TEMPLATE_FILENAME = "post.html"
-        private const val INDEX_TEMPLATE_FILENAME = "index.html"
-        private const val SNIPPET_TEMPLATE_FILENAME = "snippet.html"
-        private const val COMPONENT_YOUTUBE_VIDEO_TEMPLATE_FILENAME = "component_youtube_content.html"
         private const val JSON_OUTPUT_FILENAME = "posts.json"
         private const val INDEX_OUTPUT_FILENAME = "index.html"
-        private const val MARKDOWN_POST_TEMPLATE_FILENAME = "post.md"
 
-        private val REQUIRED_FOLDERS = listOf(RELATIVE_TEMPLATES_PATH, RELATIVE_STYLES_PATH)
+        private val REQUIRED_FOLDERS = listOf(RELATIVE_STYLES_PATH)
         private val EMBEDDED_FILENAMES = listOf("style.css","apple-touch-icon.png","favicon.ico", "icon.svg")
     }
 
@@ -186,13 +181,10 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     // MARK: - Generators -
 
     private fun generateMarkdownPost(title: String, content: String? = null) {
-        val template = readFromTemplates(MARKDOWN_POST_TEMPLATE_FILENAME)
-        val dateString = SimpleDateFormat(DATE_PATTERN).format(Date())
-        val filename = "$dateString-${title.toSlug()}.md"
-        val markdown = template
-            .replace("{{title}}", title)
-            .replace("{{date}}", dateString)
-            .replace("{{content}}", content ?: "Your content goes here")
+        val filename = "${DATE_FORMATTER.format(Date().toInstant())}-${title.toSlug()}.md"
+        val markdown = io.github.tscholze.kotlog.templates.markdown.Post(
+            title, content ?: "Your content goes here"
+        ).render()
 
         writeToPosts(filename, markdown)
         printNewPostMessage(filename)
@@ -203,79 +195,51 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         val videoUrl = "https://www.youtube.com/watch?v=$videoId"
         val embedUrl = "https://www.youtube.com/embed/$videoId"
         val dom = Jsoup.parse(URL(videoUrl), 3000)
-        val title = dom.title()
+        val title = dom.title().replace(" - YouTube", "").trim()
 
         // YouTube hides DOM elements if they are requested not by a browser
         // We have to figure out how to get the content description of a video.
 
-        val configuration = YouTubeComponentConfiguration(title, videoUrl, embedUrl)
-        val content = inflateComponentYouTubeContent(configuration)
-
+        val video = YouTubeComponentConfiguration(title, videoUrl, embedUrl)
+        val content = EmbeddedYouTubeVideo(video).render()
         generateMarkdownPost(title, content)
     }
 
     private fun generateHtmlOutput() {
-        // 1. Get configurations from markdown files
-        val configurations = File(RELATIVE_POSTS_PATH)
+        // 1. Get post configurations from markdown files
+        val posts = File(RELATIVE_POSTS_PATH)
             .walk()
             .filter { it.extension == "md" }
             .map { PostConfiguration.fromFile(it) }
 
-        val snippets = configurations
+        // 2. Transform posts into snippets
+        val snippets = posts
             .map { SnippetConfiguration.from(it) }
             .toList()
 
-        // 2. Transform configurations to html posts
-        configurations
-            .forEach { writeToOutput(it.filename, inflatePostTemplate(it)) }
+        // 3. Transform post configs into html
+        posts.forEach { writeToOutput(it.filename, Post(configuration, it).render()) }
 
-        // 3. Transform configurations to html index
-        generateIndex(snippets)
+        // 4. Transform snippets into index html
+        writeToOutput(
+            INDEX_OUTPUT_FILENAME,
+            Index(configuration, snippets).render()
+        )
 
-        // 4. Copy styles
-        embedStyling()
+        // 5. Transform snippets into json feed
+        writeToOutput(
+            JSON_OUTPUT_FILENAME,
+            Json.encodeToString(snippets)
+        )
 
-        // 5. Transform configurations to feed
-        generateJsonFeed(snippets)
+        // 5. Embed styles
+        EMBEDDED_FILENAMES.forEach { RELATIVE_OUTPUT_PATH.copyFile("$RELATIVE_STYLES_PATH/$it") }
 
         // 6. Print command to open output
         printOutputFilePath()
 
         // 7. Ask the user if changes should be published
         processCliPublishOutput()
-    }
-
-    private fun generateIndex(configurations: List<SnippetConfiguration>) {
-        // Create index file
-        val content = configurations
-            .filter { it.primaryTag.lowercase() != "archive" }
-            .sortedBy { it.relativeUrl }
-            .reversed()
-            .joinToString("~") { inflateSnippetTemplate(it) }
-
-        val archivedContent = configurations
-            .filter { it.primaryTag.lowercase() == "archive" }
-            .sortedBy { it.relativeUrl }
-            .reversed()
-            .joinToString("~") { inflateSnippetTemplate(it) }
-
-        val html = readFromTemplates(INDEX_TEMPLATE_FILENAME)
-            .replace("{{title}}", configuration.titleText)
-            .replace("{{content}}", content)
-            .replace("{{archived_content}}", archivedContent)
-
-        // Write file
-        writeToOutput(INDEX_OUTPUT_FILENAME, html)
-    }
-
-    private fun generateJsonFeed(configurations: List<SnippetConfiguration>) {
-        val json = Json.encodeToString(configurations)
-        writeToOutput(JSON_OUTPUT_FILENAME, json)
-    }
-
-    private fun embedStyling() {
-        EMBEDDED_FILENAMES
-            .forEach { copyFile("$RELATIVE_STYLES_PATH/$it", RELATIVE_OUTPUT_PATH) }
     }
 
     // MARK: - Pretty Prints -
@@ -327,34 +291,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
             .forEach { it.delete() }
     }
 
-    // MARK: - Inflaters -
-
-    private fun inflateSnippetTemplate(configuration: SnippetConfiguration): String {
-        return readFromTemplates(SNIPPET_TEMPLATE_FILENAME)
-            .replace("{{title}}", configuration.title)
-            .replace("{{relative_url}}", configuration.relativeUrl)
-    }
-
-    private fun inflatePostTemplate(configuration: PostConfiguration): String {
-        return readFromTemplates(POST_TEMPLATE_FILENAME)
-            .replace("{{title}}", configuration.title)
-            .replace("{{content}}", configuration.innerHtml)
-    }
-
-    private fun inflateComponentYouTubeContent(configuration: YouTubeComponentConfiguration): String {
-        return readFromTemplates(COMPONENT_YOUTUBE_VIDEO_TEMPLATE_FILENAME)
-            .replace("{{title}}", configuration.title)
-            .replace("{{youtube_url}}", configuration.videoUrl)
-            .replace("{{embed_url}}", configuration.embedUrl)
-    }
-
     // MARK: - File access -
-
-    private fun readFromTemplates(filename: String): String {
-        val file = File("$RELATIVE_TEMPLATES_PATH/$filename")
-        if (!file.exists()) return MISSING_TEMPLATE_WARNING
-        return file.readText()
-    }
 
     private fun writeToPosts(filenameWithExtension: String, input: String) {
         writeToPath("$RELATIVE_POSTS_PATH/$filenameWithExtension", input)
@@ -384,16 +321,16 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         }
     }
 
-    private fun copyFile(fromFilePath: String, toFilePath: String) {
+    private fun String.copyFile(fromFilePath: String) {
         shellRun {
-            command("cp", listOf("-f", fromFilePath, toFilePath))
+            command("cp", listOf("-f", fromFilePath, this@copyFile))
         }
     }
 
     // MARK: - Git -
 
     private fun pushToRemote() {
-        val message = "Content update ${SimpleDateFormat(DATE_PATTERN).format(Date())}"
+        val message = "Content update ${DATE_FORMATTER.format(Date().toInstant())}"
         shellRun {
             git.commitAllChanges(message)
             git.push("origin", "main")

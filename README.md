@@ -1,19 +1,18 @@
 # kotlin-kotlog-cli
-**Kot**lin B**log** is a CLI static blog generator - not intended for public or productional use. It features some handy shortcuts to streamline my content creation workflows.
+**Kot**lin B**log** is a CLI static blog generator - not intended for public or production use. It features some handy shortcuts to streamline my content creation workflows.
 
 ## tl;dr
-No, I do not think that you wanna use this Kotlin CLI. It is meant as a content creation helper for me needs. But if you find it interesting, awesome!
+No, I do not think that you want to use this Kotlin CLI. It is meant as a content creation helper for me needs. But if you find it interesting, awesome!
 
 ![](https://github.com/tscholze/kotlin-kotlog-cli/blob/main/docs/kotlog-desc.png?raw=true)
 
 ## Why?
-I was looking for a simple static site blog generator. Jekyll and others were to over powered and too complex for my needs. Besides this, I wanted to have a more depth look into learning Kotlin and returning to JetBrains IDEs.
+I was looking for a simple static site blog generator. Jekyll and others were too overpowered and too complex for my needs. Besides this, I wanted to have a more depth look into learning Kotlin and returning to JetBrains IDEs.
 
 Besides this, I wanted to streamline my content creation workflows by letting the program do the heavy lifting in looking for information that is required for the resulting blog post.
 
 ## Structure
 - `__posts/` - contains all Markdown posts that will be rendered
-- `__templates/` - contains all Markdown or HTML templates that will be used
 - `__styles/` - contains all drop-in CSS style files
 - `__output/` - is the regenerated HTML output directory
 
