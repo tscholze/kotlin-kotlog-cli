@@ -1,7 +1,7 @@
 package io.github.tscholze.kotlog.templates.components
 
 import io.github.tscholze.kotlog.models.BlogConfiguration
-import io.github.tscholze.kotlog.templates.HtmlGeneratable
+import io.github.tscholze.kotlog.templates.Renderable
 
 /**
  * Root template container renders a html page with given
@@ -13,7 +13,7 @@ import io.github.tscholze.kotlog.templates.HtmlGeneratable
 class RootContainer (
     val configuration: BlogConfiguration,
     val contentHtml: String
-    ): HtmlGeneratable {
+    ): Renderable {
 
     // MARK: - HtmlGeneratable -
 

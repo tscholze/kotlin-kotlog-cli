@@ -1,6 +1,6 @@
 package io.github.tscholze.kotlog.models
 
-import io.github.tscholze.kotlog.Kotlog
+import io.github.tscholze.kotlog.Kotlog.Companion.DATE_FORMATTER
 import kotlinx.serialization.Serializable
 import org.commonmark.Extension
 import org.commonmark.ext.autolink.AutolinkExtension
@@ -11,8 +11,6 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import java.io.File
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 /**
  * Defines the blog layout
@@ -74,17 +72,21 @@ class PostConfiguration(
             // Check for front matter data
             val frontMatterVisitor = YamlFrontMatterVisitor()
             node.accept(frontMatterVisitor)
-            val title = frontMatterVisitor.data["title"]?.first() ?: Kotlog.MISSING_FRONT_MATTER_TITLE_WARNING
-            val tags = frontMatterVisitor.data["tags"] ?: listOf("none")
 
+            // Ensure a title is given
+            val title = frontMatterVisitor.data["title"]?.first()
+            if (title.isNullOrEmpty()) {
+                throw AssertionError(">title< missing in front matter of post: '$title'")
+            }
+
+            // Ensure a date is given
             val dateString = frontMatterVisitor.data["date"]?.first()
             if (dateString.isNullOrEmpty()) {
-                throw AssertionError("date missing in front matter of post $title")
+                throw AssertionError(">date< missing in front matter of post: '$title'")
             }
-            val date =  LocalDate.parse(
-                dateString,
-                DateTimeFormatter.ofPattern(Kotlog.DATE_PATTERN)
-            )
+
+            val date = LocalDate.parse(dateString, DATE_FORMATTER)
+            val tags = frontMatterVisitor.data["tags"] ?: listOf("none")
 
             // Generate inner html string
             val innerHtml = HtmlRenderer.builder().build().render(node)
@@ -152,7 +154,7 @@ class SnippetConfiguration(
                 configuration.title,
                 configuration.filename,
                 configuration.tags.first(),
-                configuration.created.format(DateTimeFormatter.ofPattern(Kotlog.DATE_PATTERN))
+                configuration.created.format(DATE_FORMATTER)
             )
         }
     }
