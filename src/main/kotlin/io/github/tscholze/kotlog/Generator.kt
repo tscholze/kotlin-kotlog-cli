@@ -5,6 +5,7 @@ import io.github.tscholze.kotlog.models.BlogConfiguration
 import io.github.tscholze.kotlog.models.PostConfiguration
 import io.github.tscholze.kotlog.models.SnippetConfiguration
 import io.github.tscholze.kotlog.models.YouTubeComponentConfiguration
+import io.github.tscholze.kotlog.templates.Index
 import io.github.tscholze.kotlog.utils.toSlug
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
@@ -249,23 +250,18 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         // Create index file
         val content = configurations
             .filter { it.primaryTag.lowercase() != "archive" }
-            .sortedBy { it.relativeUrl }
+            .sortedBy { it.published }
             .reversed()
             .joinToString("~") { inflateSnippetTemplate(it) }
 
         val archivedContent = configurations
             .filter { it.primaryTag.lowercase() == "archive" }
-            .sortedBy { it.relativeUrl }
+            .sortedBy { it.published }
             .reversed()
             .joinToString("~") { inflateSnippetTemplate(it) }
 
-        val html = readFromTemplates(INDEX_TEMPLATE_FILENAME)
-            .replace("{{title}}", configuration.titleText)
-            .replace("{{content}}", content)
-            .replace("{{archived_content}}", archivedContent)
-
         // Write file
-        writeToOutput(INDEX_OUTPUT_FILENAME, html)
+        writeToOutput(INDEX_OUTPUT_FILENAME, Index(configuration, content, archivedContent).render())
     }
 
     private fun generateJsonFeed(configurations: List<SnippetConfiguration>) {

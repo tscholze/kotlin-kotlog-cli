@@ -11,6 +11,7 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import java.io.File
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 /**
@@ -142,14 +143,16 @@ data class YouTubeComponentConfiguration(
 class SnippetConfiguration(
     val title: String,
     val relativeUrl: String,
-    val primaryTag: String
+    val primaryTag: String,
+    val published: String,
 ) {
     companion object {
         fun from(configuration: PostConfiguration): SnippetConfiguration {
             return SnippetConfiguration(
                 configuration.title,
                 configuration.filename,
-                configuration.tags.first()
+                configuration.tags.first(),
+                configuration.created.format(DateTimeFormatter.ofPattern(Kotlog.DATE_PATTERN))
             )
         }
     }
