@@ -35,6 +35,11 @@ class PostConfiguration(
      */
     val title: String,
 
+    /*
+    * Abstract of blogs content
+     */
+    val abstract: String,
+
     /**
      * Post's html file name
      */
@@ -85,6 +90,7 @@ class PostConfiguration(
                 throw AssertionError(">date< missing in front matter of post: '$title'")
             }
 
+            val abstract = frontMatterVisitor.data["abstract"]?.first() ?: ""
             val date = LocalDate.parse(dateString, DATE_FORMATTER)
             val tags = frontMatterVisitor.data["tags"] ?: listOf("none")
 
@@ -97,6 +103,7 @@ class PostConfiguration(
             // Return created configuration
             return PostConfiguration(
                 title,
+                abstract,
                 filename,
                 date,
                 tags,
