@@ -8,6 +8,7 @@ import io.github.tscholze.kotlog.models.YouTubeComponentConfiguration
 import io.github.tscholze.kotlog.templates.components.EmbeddedYouTubeVideo
 import io.github.tscholze.kotlog.templates.html.Index
 import io.github.tscholze.kotlog.templates.html.Post
+import io.github.tscholze.kotlog.templates.images.SocialMediaPreviewImage
 import io.github.tscholze.kotlog.utils.toSlug
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
@@ -43,12 +44,12 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         // MARK: - Internal constants -
 
         val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")!!
+        const val RELATIVE_OUTPUT_PATH = "__output"
 
         // MARK: - Private constants -
 
         private const val RELATIVE_POSTS_PATH = "__posts"
         private const val RELATIVE_STYLES_PATH = "__styles"
-        private const val RELATIVE_OUTPUT_PATH = "__output"
 
         private const val JSON_OUTPUT_FILENAME = "posts.json"
         private const val INDEX_OUTPUT_FILENAME = "index.html"
@@ -219,6 +220,8 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
 
         // 3. Transform post configs into html
         posts.forEach { writeToOutput(it.filename, Post(configuration, it).render()) }
+
+        posts.forEach { SocialMediaPreviewImage.generate(it) }
 
         // 4. Transform snippets into index html
         writeToOutput(

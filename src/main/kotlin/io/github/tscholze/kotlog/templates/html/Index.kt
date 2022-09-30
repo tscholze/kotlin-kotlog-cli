@@ -35,6 +35,6 @@ class Index(
             """.trimIndent()
 
         // Render as page
-        return RootContainer(blogConfiguration, innerHtml).render()
+        return RootContainer(blogConfiguration, "index.html", contentHtml = innerHtml).render()
     }
 }

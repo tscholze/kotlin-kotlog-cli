@@ -15,12 +15,14 @@ import java.time.LocalDate
 /**
  * Defines the blog layout
  *
+ * @param baseUrlString Base url like 'https://tscholze.github.io/blog/'
  * @property titleText Title (Header) of the blog
  * @property footerText Footer text of the blog
  */
 data class BlogConfiguration(
+    val baseUrlString: String,
     val titleText: String,
-    val footerText: String
+    val footerText: String,
 )
 
 /**
@@ -34,6 +36,11 @@ class PostConfiguration(
      * Title of the resulting post
      */
     val title: String,
+
+    /*
+    * Abstract of blogs content
+     */
+    val abstract: String,
 
     /**
      * Post's html file name
@@ -85,6 +92,7 @@ class PostConfiguration(
                 throw AssertionError(">date< missing in front matter of post: '$title'")
             }
 
+            val abstract = frontMatterVisitor.data["abstract"]?.first() ?: ""
             val date = LocalDate.parse(dateString, DATE_FORMATTER)
             val tags = frontMatterVisitor.data["tags"] ?: listOf("none")
 
@@ -97,6 +105,7 @@ class PostConfiguration(
             // Return created configuration
             return PostConfiguration(
                 title,
+                abstract,
                 filename,
                 date,
                 tags,

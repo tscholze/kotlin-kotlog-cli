@@ -22,6 +22,13 @@ class Post(
                  <a href="index.html">Back</a>
             """.trimIndent()
 
-        return RootContainer(configuration, innerHtml).render()
+        return RootContainer(
+            configuration,
+            post.filename,
+            post.title,
+            post.abstract,
+            "${post.filename}.png",
+            innerHtml
+        ).render()
     }
 }
