@@ -25,16 +25,15 @@ class SocialMediaPreviewImage {
             )
         )
 
-        private val WIDTH = 1280
-        private val HEIGHT = 640
+        private const val WIDTH = 1280
+        private const val HEIGHT = 640
+        private const val MAX_ABSTRACT_ROW_WIDTH = 1000
 
         private val TITLE_FONT = Font("Baskerville", 1, 72)
         private val TITLE_COLOR = Color.BLACK!!
 
         private val ABSTRACT_FONT = Font("Helvetica Neue", 3, 42)
         private val ABSTRACT_COLOR = Color.LIGHT_GRAY!!
-
-        private const val MAX_ABSTRACT_ROW_WIDTH = 1000
 
         // MARK: - Internal helper methods -
 
