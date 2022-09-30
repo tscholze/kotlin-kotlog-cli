@@ -15,6 +15,7 @@ import kotlinx.cli.ArgType
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jsoup.Jsoup
+import java.awt.Color.green
 import java.io.File
 import java.net.URL
 import java.nio.file.Paths
@@ -69,10 +70,15 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         this.configuration = configuration
 
         // Run generator
-        run(args)
+        //run(args)
+        run()
     }
 
     // MARK: - Run -
+
+    private fun run() {
+
+    }
 
     private fun run(args: Array<String>) {
         // Greet the user
