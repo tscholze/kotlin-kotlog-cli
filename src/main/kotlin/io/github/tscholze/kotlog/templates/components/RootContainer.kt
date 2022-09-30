@@ -11,11 +11,15 @@ import io.github.tscholze.kotlog.templates.Renderable
  * @param contentHtml Content of container
  */
 class RootContainer (
-    val configuration: BlogConfiguration,
-    val contentHtml: String
+    private val configuration: BlogConfiguration,
+    private val permaUrlPath: String,
+    private val contentTitle: String? = null,
+    private val contentAbstraction: String? = null,
+    private val contentPreviewImageUrlString: String? = null,
+    private val contentHtml: String
     ): Renderable {
 
-    // MARK: - HtmlGeneratable -
+    // MARK: - Renderable -
 
     override fun render(): String {
        return """<!doctype html>
@@ -25,6 +29,12 @@ class RootContainer (
           <meta charset="utf-8">
           <meta name="description" content="">
           <meta name="viewport" content="width=device-width, initial-scale=1">
+          <meta property="og:type" content="article" />
+          <meta name="twitter:card" content="summary_large_image">
+          <meta property="og:url" content="${configuration.baseUrlString}$permaUrlPath" />
+          ${contentPreviewImageUrlString.let { "<meta property=\"og:image\" content=\"${configuration.baseUrlString}$it\">" }}
+          ${contentTitle.let { "<meta property=\"og:title\" content=\"${it}\">" }}
+          ${contentAbstraction.let { "<meta property=\"og:description\" content=\"${it}\">" }}
 
           <title>${configuration.titleText}</title>
 

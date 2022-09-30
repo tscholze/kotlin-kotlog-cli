@@ -44,12 +44,12 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         // MARK: - Internal constants -
 
         val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")!!
+        const val RELATIVE_OUTPUT_PATH = "__output"
 
         // MARK: - Private constants -
 
         private const val RELATIVE_POSTS_PATH = "__posts"
         private const val RELATIVE_STYLES_PATH = "__styles"
-        private const val RELATIVE_OUTPUT_PATH = "__output"
 
         private const val JSON_OUTPUT_FILENAME = "posts.json"
         private const val INDEX_OUTPUT_FILENAME = "index.html"

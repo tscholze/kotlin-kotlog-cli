@@ -15,12 +15,14 @@ import java.time.LocalDate
 /**
  * Defines the blog layout
  *
+ * @param baseUrlString Base url like 'https://tscholze.github.io/blog/'
  * @property titleText Title (Header) of the blog
  * @property footerText Footer text of the blog
  */
 data class BlogConfiguration(
+    val baseUrlString: String,
     val titleText: String,
-    val footerText: String
+    val footerText: String,
 )
 
 /**

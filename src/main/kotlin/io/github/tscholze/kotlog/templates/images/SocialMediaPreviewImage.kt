@@ -1,5 +1,6 @@
 package io.github.tscholze.kotlog.templates.images
 
+import io.github.tscholze.kotlog.Kotlog
 import io.github.tscholze.kotlog.models.PostConfiguration
 import java.awt.Color
 import java.awt.Font
@@ -72,7 +73,7 @@ class SocialMediaPreviewImage {
             }
 
             // Write file
-            ImageIO.write(image, "PNG", File(File("./"), "${postConfiguration.filename}.png"))
+            ImageIO.write(image, "PNG", File(File("./${Kotlog.RELATIVE_OUTPUT_PATH}"), "${postConfiguration.filename}.png"))
         }
 
         // MARK: - Private helper -
