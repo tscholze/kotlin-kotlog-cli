@@ -1,6 +1,7 @@
 ---
-title: Hi, I'm Kotlog!
-date: 2022-09-16
+title: 'Hi, I'm Kotlog!'
+abstract: 'Kotlog, a static site generator, is my new pet project that helps me to stream line my content creation workflows.'
+date: '2022-09-16'
 ---
 
 Hi there, this is my very first post using Kotlog - my Kotlin CLI playground for streamlining my content creation workflow.
