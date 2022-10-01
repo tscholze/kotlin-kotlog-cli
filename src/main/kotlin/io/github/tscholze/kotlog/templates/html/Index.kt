@@ -16,7 +16,7 @@ class Index(
     override fun render(): String {
 
         val sortedSnippets = snippets
-            .sortedBy { it.published }
+            .sortedBy { it.created }
             .reversed()
 
         val posts = sortedSnippets

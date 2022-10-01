@@ -1,6 +1,5 @@
 package io.github.tscholze.kotlog.templates.images
 
-import io.github.tscholze.kotlog.Kotlog
 import io.github.tscholze.kotlog.models.PostConfiguration
 import java.awt.Color
 import java.awt.Font
@@ -42,8 +41,9 @@ class SocialMediaPreviewImage {
          * Generates a preview image from given post configuration
          *
          * @param postConfiguration Given configuration
+         * @param outputDirectoryName Output directy name
          */
-        fun generate(postConfiguration: PostConfiguration) {
+        fun generate(postConfiguration: PostConfiguration, outputDirectoryName: String) {
 
             // Create canvas
             val image = BufferedImage(
@@ -73,7 +73,7 @@ class SocialMediaPreviewImage {
             }
 
             // Write file
-            ImageIO.write(image, "PNG", File(File("./${Kotlog.RELATIVE_OUTPUT_PATH}"), "${postConfiguration.filename}.png"))
+            ImageIO.write(image, "PNG", File(File("./$outputDirectoryName"), "${postConfiguration.filename}.png"))
         }
 
         // MARK: - Private helper -
