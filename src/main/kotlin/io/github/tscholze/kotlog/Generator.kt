@@ -215,7 +215,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
 
         // 2. Transform posts into snippets
         val snippets = posts
-            .map { SnippetConfiguration.from(it, configuration.baseUrlString) }
+            .map { SnippetConfiguration.from(it, configuration.baseUrl) }
             .toList()
 
         // 3. Transform post configs into html

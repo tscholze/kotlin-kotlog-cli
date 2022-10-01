@@ -1,7 +1,6 @@
 package io.github.tscholze.kotlog.models
 
-import io.github.tscholze.kotlog.Kotlog.Companion.DATE_FORMATTER
-import kotlinx.serialization.Serializable
+import io.github.tscholze.kotlog.Kotlog
 import org.commonmark.Extension
 import org.commonmark.ext.autolink.AutolinkExtension
 import org.commonmark.ext.front.matter.YamlFrontMatterExtension
@@ -11,21 +10,6 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import java.io.File
 import java.time.LocalDate
-
-/**
- * Defines the blog layout
- *
- * @property baseUrlString Base url like 'https://tscholze.github.io/blog/'
- * @property titleText Title (Header) of the blog
- * @property footerText Footer text of the blog
- * @property outputDirectoryName The output were the generated content should be placed
- */
-data class BlogConfiguration(
-    val baseUrlString: String,
-    val titleText: String,
-    val footerText: String,
-    val outputDirectoryName: String
-)
 
 /**
  * Defines the post layout
@@ -78,7 +62,7 @@ class PostConfiguration(
             }
 
             val abstract = frontMatterVisitor.data["abstract"]?.first() ?: ""
-            val date = LocalDate.parse(dateString, DATE_FORMATTER)
+            val date = LocalDate.parse(dateString, Kotlog.DATE_FORMATTER)
             val tags = frontMatterVisitor.data["tags"] ?: listOf("none")
 
             // Generate inner html string
@@ -112,51 +96,5 @@ class PostConfiguration(
                     .extensions(extensions)
                     .build()
             }
-    }
-}
-
-/**
- * Defines a YouTube component.
- *
- * @property title Title of the blog post
- * @property videoUrl Url to the YouTube browser video
- * @property embedUrl URl to the embedded YouTube player
- */
-data class YouTubeComponentConfiguration(
-    val title: String,
-    val videoUrl: String,
-    val embedUrl: String
-)
-
-/**
- * Defines a content snippet
- *
- * @property title Title of the post
- * @property relativeUrl Url to the corresponding html page
- * @property primaryTag Primary (first) tag of the post
- * @property created: Markdown created timestamp
- * @property urlString Url to the post
- * @property coverImageUrlString Url to the cover image
- */
-@Serializable
-class SnippetConfiguration(
-    val title: String,
-    val relativeUrl: String,
-    val primaryTag: String,
-    val created: String,
-    private val urlString: String,
-    private val coverImageUrlString: String
-) {
-    companion object {
-        fun from(configuration: PostConfiguration, baseUrlString: String): SnippetConfiguration {
-            return SnippetConfiguration(
-                configuration.title,
-                configuration.filename,
-                configuration.tags.first(),
-                configuration.created.format(DATE_FORMATTER),
-                "$baseUrlString/{${configuration.filename}",
-                "$baseUrlString/{${configuration.filename}.png"
-            )
-        }
     }
 }
