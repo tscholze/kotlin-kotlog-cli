@@ -9,6 +9,7 @@ import io.github.tscholze.kotlog.templates.components.EmbeddedYouTubeVideo
 import io.github.tscholze.kotlog.templates.html.Index
 import io.github.tscholze.kotlog.templates.html.Post
 import io.github.tscholze.kotlog.templates.images.SocialMediaPreviewImage
+import io.github.tscholze.kotlog.terminal.Terminal
 import io.github.tscholze.kotlog.utils.toSlug
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
@@ -77,7 +78,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     // MARK: - Run -
 
     private fun run() {
-
+        Terminal.generateConfiguration()
     }
 
     private fun run(args: Array<String>) {
