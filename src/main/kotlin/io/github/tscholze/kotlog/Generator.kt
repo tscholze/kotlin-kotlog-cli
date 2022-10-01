@@ -219,29 +219,31 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
             .toList()
 
         // 3. Transform post configs into html
-        posts.forEach { writeToOutput(it.filename, Post(configuration, it).render()) }
+        // 4. Transform post configs into images
+        posts.forEach {
+            writeToOutput(it.filename, Post(configuration, it).render())
+            SocialMediaPreviewImage.generate(it)
+        }
 
-        posts.forEach { SocialMediaPreviewImage.generate(it) }
-
-        // 4. Transform snippets into index html
+        // 5. Transform snippets into index html
         writeToOutput(
             INDEX_OUTPUT_FILENAME,
             Index(configuration, snippets).render()
         )
 
-        // 5. Transform snippets into json feed
+        // 6. Transform snippets into json feed
         writeToOutput(
             JSON_OUTPUT_FILENAME,
             Json.encodeToString(snippets)
         )
 
-        // 5. Embed styles
+        // 7. Embed styles
         EMBEDDED_FILENAMES.forEach { RELATIVE_OUTPUT_PATH.copyFile("$RELATIVE_STYLES_PATH/$it") }
 
-        // 6. Print command to open output
+        // 8. Print command to open output
         printOutputFilePath()
 
-        // 7. Ask the user if changes should be published
+        // 9. Ask the user if changes should be published
         processCliPublishOutput()
     }
 
