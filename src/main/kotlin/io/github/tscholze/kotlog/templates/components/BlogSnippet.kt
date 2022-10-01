@@ -18,7 +18,7 @@ class BlogSnippet(
 
         return """
             <div class="snippet">
-                <a href="${configuration.relativeUrl}">$title</a> <small color="#c0c0c0">(${configuration.published})</small>
+                <a href="${configuration.relativeUrl}">$title</a> <small color="#c0c0c0">(${configuration.created})</small>
             </div>
         """.trimIndent()
     }

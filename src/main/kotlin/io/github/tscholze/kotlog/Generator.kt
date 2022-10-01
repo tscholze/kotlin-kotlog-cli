@@ -44,7 +44,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         // MARK: - Internal constants -
 
         val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")!!
-        const val RELATIVE_OUTPUT_PATH = "__output"
+        val WORKING_DIRECTORY = Paths.get("").toAbsolutePath().toString()
 
         // MARK: - Private constants -
 
@@ -164,7 +164,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
 
         if (boolString == "y") {
             shellRun {
-                val path = "${Paths.get("").toAbsolutePath()}/$RELATIVE_POSTS_PATH/$filename"
+                val path = "$WORKING_DIRECTORY/$RELATIVE_POSTS_PATH/$filename"
                 command("code", listOf(path))
             }
         }
@@ -215,14 +215,14 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
 
         // 2. Transform posts into snippets
         val snippets = posts
-            .map { SnippetConfiguration.from(it) }
+            .map { SnippetConfiguration.from(it, configuration.baseUrlString) }
             .toList()
 
         // 3. Transform post configs into html
         // 4. Transform post configs into images
         posts.forEach {
             writeToOutput(it.filename, Post(configuration, it).render())
-            SocialMediaPreviewImage.generate(it)
+            SocialMediaPreviewImage.generate(it, configuration.outputDirectoryName)
         }
 
         // 5. Transform snippets into index html
@@ -238,7 +238,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         )
 
         // 7. Embed styles
-        EMBEDDED_FILENAMES.forEach { RELATIVE_OUTPUT_PATH.copyFile("$RELATIVE_STYLES_PATH/$it") }
+        EMBEDDED_FILENAMES.forEach { configuration.outputDirectoryName.copyFile("$RELATIVE_STYLES_PATH/$it") }
 
         // 8. Print command to open output
         printOutputFilePath()
@@ -267,14 +267,14 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     private fun printOutputFilePath() {
         println("")
         println("Html has been generated to folder:")
-        println("Location: ${Paths.get("").toAbsolutePath()}/$RELATIVE_OUTPUT_PATH/")
+        println("Location: $WORKING_DIRECTORY/${configuration.outputDirectoryName}")
         println("")
     }
 
     private fun printNewPostMessage(filenameWithExtension: String) {
         println("")
         println("New post '$filenameWithExtension' has been created!")
-        println("Location: ${Paths.get("").toAbsolutePath()}/$RELATIVE_POSTS_PATH/$filenameWithExtension")
+        println("Location: $WORKING_DIRECTORY/$RELATIVE_POSTS_PATH/$filenameWithExtension")
         println("Run `kotlog -g` to generate the html.")
         println("")
     }
@@ -290,7 +290,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     // MARK: - Cleaning helper -
 
     private fun cleanOutput() {
-        File(RELATIVE_OUTPUT_PATH)
+        File(configuration.outputDirectoryName)
             .walk()
             .filter { it.nameWithoutExtension != "assets" }
             .forEach { it.delete() }
@@ -303,7 +303,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     }
 
     private fun writeToOutput(filenameWithExtension: String, input: String) {
-        writeToPath("$RELATIVE_OUTPUT_PATH/$filenameWithExtension", input)
+        writeToPath("${configuration.outputDirectoryName}/$filenameWithExtension", input)
     }
 
     private fun writeToPath(filePath: String, input: String) {

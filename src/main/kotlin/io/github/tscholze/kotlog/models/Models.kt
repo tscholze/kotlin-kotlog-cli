@@ -15,14 +15,16 @@ import java.time.LocalDate
 /**
  * Defines the blog layout
  *
- * @param baseUrlString Base url like 'https://tscholze.github.io/blog/'
+ * @property baseUrlString Base url like 'https://tscholze.github.io/blog/'
  * @property titleText Title (Header) of the blog
  * @property footerText Footer text of the blog
+ * @property outputDirectoryName The output were the generated content should be placed
  */
 data class BlogConfiguration(
     val baseUrlString: String,
     val titleText: String,
     val footerText: String,
+    val outputDirectoryName: String
 )
 
 /**
@@ -30,37 +32,19 @@ data class BlogConfiguration(
  *
  * @property title Title of the blog post
  * @property innerHtml Rendered inner html content
+ * @property abstract: Abstract text of the content
+ * @property filename: Post's html file name
+ * @property created: Markdown created timestamp
+ * @property tags: Assigns tag list
+ * @property innerHtml: Inner html (content) value
  */
 class PostConfiguration(
-    /**
-     * Title of the resulting post
-     */
     val title: String,
-
-    /*
-    * Abstract of blogs content
-     */
     val abstract: String,
-
-    /**
-     * Post's html file name
-     */
     val filename: String,
-
-    /*
-    *  Markdown created timestamp
-     */
     val created: LocalDate,
-
-    /*
-    * Post's tags
-     */
     val tags: List<String>,
-
-    /**
-     * Inner html (content) value
-     */
-    val innerHtml: String
+    val innerHtml: String,
 ) {
     companion object {
 
@@ -73,6 +57,7 @@ class PostConfiguration(
          * @return Created configuration object
          */
         fun fromFile(file: File): PostConfiguration {
+
             // Parse file
             val node = parser.parse(file.readText())
 
@@ -149,21 +134,28 @@ data class YouTubeComponentConfiguration(
  * @property title Title of the post
  * @property relativeUrl Url to the corresponding html page
  * @property primaryTag Primary (first) tag of the post
+ * @property created: Markdown created timestamp
+ * @property urlString Url to the post
+ * @property coverImageUrlString Url to the cover image
  */
 @Serializable
 class SnippetConfiguration(
     val title: String,
     val relativeUrl: String,
     val primaryTag: String,
-    val published: String,
+    val created: String,
+    private val urlString: String,
+    private val coverImageUrlString: String
 ) {
     companion object {
-        fun from(configuration: PostConfiguration): SnippetConfiguration {
+        fun from(configuration: PostConfiguration, baseUrlString: String): SnippetConfiguration {
             return SnippetConfiguration(
                 configuration.title,
                 configuration.filename,
                 configuration.tags.first(),
-                configuration.created.format(DATE_FORMATTER)
+                configuration.created.format(DATE_FORMATTER),
+                "$baseUrlString/{${configuration.filename}",
+                "$baseUrlString/{${configuration.filename}.png"
             )
         }
     }
