@@ -45,7 +45,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         // MARK: - Internal constants -
 
         val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")!!
-        const val RELATIVE_OUTPUT_PATH = "__output"
+        val WORKING_DIRECTORY = Paths.get("").toAbsolutePath().toString()
 
         // MARK: - Private constants -
 
@@ -170,7 +170,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
 
         if (boolString == "y") {
             shellRun {
-                val path = "${Paths.get("").toAbsolutePath()}/$RELATIVE_POSTS_PATH/$filename"
+                val path = "$WORKING_DIRECTORY/$RELATIVE_POSTS_PATH/$filename"
                 command("code", listOf(path))
             }
         }
@@ -221,33 +221,35 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
 
         // 2. Transform posts into snippets
         val snippets = posts
-            .map { SnippetConfiguration.from(it) }
+            .map { SnippetConfiguration.from(it, configuration.baseUrl) }
             .toList()
 
         // 3. Transform post configs into html
-        posts.forEach { writeToOutput(it.filename, Post(configuration, it).render()) }
+        // 4. Transform post configs into images
+        posts.forEach {
+            writeToOutput(it.filename, Post(configuration, it).render())
+            SocialMediaPreviewImage.generate(it, configuration.outputDirectoryName)
+        }
 
-        posts.forEach { SocialMediaPreviewImage.generate(it) }
-
-        // 4. Transform snippets into index html
+        // 5. Transform snippets into index html
         writeToOutput(
             INDEX_OUTPUT_FILENAME,
             Index(configuration, snippets).render()
         )
 
-        // 5. Transform snippets into json feed
+        // 6. Transform snippets into json feed
         writeToOutput(
             JSON_OUTPUT_FILENAME,
             Json.encodeToString(snippets)
         )
 
-        // 5. Embed styles
-        EMBEDDED_FILENAMES.forEach { RELATIVE_OUTPUT_PATH.copyFile("$RELATIVE_STYLES_PATH/$it") }
+        // 7. Embed styles
+        EMBEDDED_FILENAMES.forEach { configuration.outputDirectoryName.copyFile("$RELATIVE_STYLES_PATH/$it") }
 
-        // 6. Print command to open output
+        // 8. Print command to open output
         printOutputFilePath()
 
-        // 7. Ask the user if changes should be published
+        // 9. Ask the user if changes should be published
         processCliPublishOutput()
     }
 
@@ -271,14 +273,14 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     private fun printOutputFilePath() {
         println("")
         println("Html has been generated to folder:")
-        println("Location: ${Paths.get("").toAbsolutePath()}/$RELATIVE_OUTPUT_PATH/")
+        println("Location: $WORKING_DIRECTORY/${configuration.outputDirectoryName}")
         println("")
     }
 
     private fun printNewPostMessage(filenameWithExtension: String) {
         println("")
         println("New post '$filenameWithExtension' has been created!")
-        println("Location: ${Paths.get("").toAbsolutePath()}/$RELATIVE_POSTS_PATH/$filenameWithExtension")
+        println("Location: $WORKING_DIRECTORY/$RELATIVE_POSTS_PATH/$filenameWithExtension")
         println("Run `kotlog -g` to generate the html.")
         println("")
     }
@@ -294,7 +296,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     // MARK: - Cleaning helper -
 
     private fun cleanOutput() {
-        File(RELATIVE_OUTPUT_PATH)
+        File(configuration.outputDirectoryName)
             .walk()
             .filter { it.nameWithoutExtension != "assets" }
             .forEach { it.delete() }
@@ -307,7 +309,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     }
 
     private fun writeToOutput(filenameWithExtension: String, input: String) {
-        writeToPath("$RELATIVE_OUTPUT_PATH/$filenameWithExtension", input)
+        writeToPath("${configuration.outputDirectoryName}/$filenameWithExtension", input)
     }
 
     private fun writeToPath(filePath: String, input: String) {

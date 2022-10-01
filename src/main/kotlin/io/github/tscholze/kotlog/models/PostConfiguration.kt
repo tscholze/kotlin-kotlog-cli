@@ -1,7 +1,6 @@
 package io.github.tscholze.kotlog.models
 
-import io.github.tscholze.kotlog.Kotlog.Companion.DATE_FORMATTER
-import kotlinx.serialization.Serializable
+import io.github.tscholze.kotlog.Kotlog
 import org.commonmark.Extension
 import org.commonmark.ext.autolink.AutolinkExtension
 import org.commonmark.ext.front.matter.YamlFrontMatterExtension
@@ -13,54 +12,23 @@ import java.io.File
 import java.time.LocalDate
 
 /**
- * Defines the blog layout
- *
- * @param baseUrlString Base url like 'https://tscholze.github.io/blog/'
- * @property titleText Title (Header) of the blog
- * @property footerText Footer text of the blog
- */
-data class BlogConfiguration(
-    val baseUrlString: String,
-    val titleText: String,
-    val footerText: String,
-)
-
-/**
  * Defines the post layout
  *
  * @property title Title of the blog post
  * @property innerHtml Rendered inner html content
+ * @property abstract: Abstract text of the content
+ * @property filename: Post's html file name
+ * @property created: Markdown created timestamp
+ * @property tags: Assigns tag list
+ * @property innerHtml: Inner html (content) value
  */
 class PostConfiguration(
-    /**
-     * Title of the resulting post
-     */
     val title: String,
-
-    /*
-    * Abstract of blogs content
-     */
     val abstract: String,
-
-    /**
-     * Post's html file name
-     */
     val filename: String,
-
-    /*
-    *  Markdown created timestamp
-     */
     val created: LocalDate,
-
-    /*
-    * Post's tags
-     */
     val tags: List<String>,
-
-    /**
-     * Inner html (content) value
-     */
-    val innerHtml: String
+    val innerHtml: String,
 ) {
     companion object {
 
@@ -73,6 +41,7 @@ class PostConfiguration(
          * @return Created configuration object
          */
         fun fromFile(file: File): PostConfiguration {
+
             // Parse file
             val node = parser.parse(file.readText())
 
@@ -93,7 +62,7 @@ class PostConfiguration(
             }
 
             val abstract = frontMatterVisitor.data["abstract"]?.first() ?: ""
-            val date = LocalDate.parse(dateString, DATE_FORMATTER)
+            val date = LocalDate.parse(dateString, Kotlog.DATE_FORMATTER)
             val tags = frontMatterVisitor.data["tags"] ?: listOf("none")
 
             // Generate inner html string
@@ -127,44 +96,5 @@ class PostConfiguration(
                     .extensions(extensions)
                     .build()
             }
-    }
-}
-
-/**
- * Defines a YouTube component.
- *
- * @property title Title of the blog post
- * @property videoUrl Url to the YouTube browser video
- * @property embedUrl URl to the embedded YouTube player
- */
-data class YouTubeComponentConfiguration(
-    val title: String,
-    val videoUrl: String,
-    val embedUrl: String
-)
-
-/**
- * Defines a content snippet
- *
- * @property title Title of the post
- * @property relativeUrl Url to the corresponding html page
- * @property primaryTag Primary (first) tag of the post
- */
-@Serializable
-class SnippetConfiguration(
-    val title: String,
-    val relativeUrl: String,
-    val primaryTag: String,
-    val published: String,
-) {
-    companion object {
-        fun from(configuration: PostConfiguration): SnippetConfiguration {
-            return SnippetConfiguration(
-                configuration.title,
-                configuration.filename,
-                configuration.tags.first(),
-                configuration.created.format(DATE_FORMATTER)
-            )
-        }
     }
 }
