@@ -18,6 +18,7 @@ import org.jsoup.Jsoup
 import java.io.File
 import java.net.URL
 import java.nio.file.Paths
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.io.path.Path
@@ -43,7 +44,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
     companion object {
         // MARK: - Internal constants -
 
-        val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")!!
+        val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneOffset.UTC)!!
         val WORKING_DIRECTORY = Paths.get("").toAbsolutePath().toString()
 
         // MARK: - Private constants -
