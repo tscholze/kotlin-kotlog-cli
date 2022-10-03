@@ -27,7 +27,7 @@ class SnippetConfiguration(
                 configuration.title,
                 configuration.tags.first(),
                 configuration.created.format(DATE_FORMATTER),
-                "$baseUrlString/{${configuration.filename}",
+                "$baseUrlString/${configuration.filename}",
                 "$baseUrlString/${configuration.filename}.png"
             )
         }
