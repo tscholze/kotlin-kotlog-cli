@@ -11,6 +11,12 @@ I was looking for a simple static site blog generator. Jekyll and others were to
 
 Besides this, I wanted to streamline my content creation workflows by letting the program do the heavy lifting in looking for information that is required for the resulting blog post.
 
+## Status
+
+|Service|Status|
+|-|-|
+|Qodana check|[![Qodana](https://github.com/tscholze/kotlin-kotlog-cli/actions/workflows/code_quality.yml/badge.svg)](https://github.com/tscholze/kotlin-kotlog-cli/actions/workflows/code_quality.yml)|
+|Gradle build|[![Build](https://github.com/tscholze/kotlin-kotlog-cli/actions/workflows/build.yml/badge.svg)](https://github.com/tscholze/kotlin-kotlog-cli/actions/workflows/build.yml)|
 ## Structure
 - `__posts/`  - contains all Markdown posts that will be rendered
 - `__styles/` - contains all static style files that has to be embedded

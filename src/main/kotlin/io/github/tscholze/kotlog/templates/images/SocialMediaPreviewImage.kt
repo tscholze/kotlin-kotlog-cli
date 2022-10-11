@@ -41,7 +41,7 @@ class SocialMediaPreviewImage {
          * Generates a preview image from given post configuration
          *
          * @param postConfiguration Given configuration
-         * @param outputDirectoryName Output directy name
+         * @param outputDirectoryName Output directly name
          */
         fun generate(postConfiguration: PostConfiguration, outputDirectoryName: String) {
 
