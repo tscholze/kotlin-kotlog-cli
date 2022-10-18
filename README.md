@@ -37,7 +37,8 @@ Clone the [kotlog-template repository](https://github.com/tscholze/kotlin-kotlog
 
 ## Configuration
 
-A blog ist configurated using the `BlogConfiguration` parameter of `Kotlog. See `Main.kt` for a working example:
+A Kotlog-generated blog ist configurated using the `BlogConfiguration` parameter of the `Kotlog` invocation.
+See `Main.kt` for a working example:
 
 ```kotlin
 fun main(args: Array<String>) {
