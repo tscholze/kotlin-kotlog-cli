@@ -35,6 +35,24 @@ Clone the [kotlog-template repository](https://github.com/tscholze/kotlin-kotlog
  -co                    : Clears the output
 ```
 
+## Configuration
+
+A blog ist configurated using the `BlogConfiguration` parameter of `Kotlog. See `Main.kt` for a working example:
+
+```kotlin
+fun main(args: Array<String>) {
+
+    val configuration = BlogConfiguration(
+        baseUrl = "https://tscholze.github.io/blog",
+        titleText = "Tobias Scholze | The Stuttering Nerd",
+        footerText = "Made with ❤️ without JavaScript| Kotlog | Tobias Scholze",
+        outputDirectoryName = "www"
+    )
+
+    Kotlog(args, configuration)
+}
+```
+
 ## How it looks
 ![](https://github.com/tscholze/kotlin-kotlog-cli/blob/main/docs/kotlog-markdown2html.png?raw=true)
 (Design, look and feel and other ui elements my differ from version to version)
