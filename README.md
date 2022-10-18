@@ -20,14 +20,14 @@ Besides this, I wanted to streamline my content creation workflows by letting th
 ## Structure
 - `__posts/`  - contains all Markdown posts that will be rendered
 - `__styles/` - contains all static style files that has to be embedded
-- `__output/` - contains generated content
+- `www/` - contains generated content (configurable in Main.kt)
 
 ## Usage
 
 Clone the [kotlog-template repository](https://github.com/tscholze/kotlin-kotlog-template) first, then you are ready to run the CLI.
 
 ```
-java -jar kotlog [options]
+./kotlog [options]
  -c 'My awesome title'  : Creates a new blog post
  -y 'beYqB6QXQuY'       : Creates a YouTube post
  -g                     :  Generates HTML output
