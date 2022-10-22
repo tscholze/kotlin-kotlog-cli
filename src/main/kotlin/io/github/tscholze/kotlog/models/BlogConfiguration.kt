@@ -14,20 +14,10 @@ import kotlinx.serialization.json.JsonNames
  * @property youtubeKey YouTube API Key, default value is empty string.
  */
 @Serializable
-@OptIn(ExperimentalSerializationApi::class)
 data class BlogConfiguration(
-    @JsonNames("base_url")
     val baseUrl: String,
-
-    @JsonNames("title_text")
     val titleText: String,
-
-    @JsonNames("footer_text")
     val footerText: String,
-
-    @JsonNames("output_directory_name")
     val outputDirectoryName: String,
-
-    @JsonNames("youtube_key")
     val youtubeKey: String = "",
 )

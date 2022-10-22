@@ -48,7 +48,7 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
         // MARK: - Private constants -
 
-        private const val ABSOLUTE_CONFIG_PATH = "~/.kotlog"
+        private val ABSOLUTE_CONFIG_PATH = System.getProperty("user.home")+"/.kotlog"
         private const val RELATIVE_POSTS_PATH = "__posts"
         private const val RELATIVE_STYLES_PATH = "__styles"
 
