@@ -1,17 +1,25 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+// MARK: - Properties -
+
+group = "io.github.tscholze"
+version = "1.0.5"
+
+// MARK: - Plugins -
+
 plugins {
     kotlin("jvm") version "1.7.10"
     kotlin("plugin.serialization") version "1.7.10"
     application
 }
 
-group = "io.github.tscholze"
-version = "1.0.5"
+// MARK: - Repositories -
 
 repositories {
     mavenCentral()
 }
+
+// MARK: - Dependencies -
 
 dependencies {
     // Markdown
@@ -34,6 +42,14 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
+// MARK: - Application settings -
+
+application {
+    mainClass.set("MainKt")
+}
+
+// MARK: - Gradle tasks -
+
 tasks.jar {
     manifest {
         attributes["Main-Class"] = "MainKt"
@@ -50,8 +66,4 @@ tasks.test {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
-}
-
-application {
-    mainClass.set("MainKt")
 }

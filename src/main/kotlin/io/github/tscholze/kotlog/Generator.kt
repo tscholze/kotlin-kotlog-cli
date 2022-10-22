@@ -12,6 +12,7 @@ import io.github.tscholze.kotlog.templates.images.SocialMediaPreviewImage
 import io.github.tscholze.kotlog.utils.toSlug
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jsoup.Jsoup
@@ -21,17 +22,14 @@ import java.nio.file.Paths
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.io.path.Path
-import kotlin.io.path.createDirectory
-import kotlin.io.path.exists
-import kotlin.io.path.writeText
+import kotlin.io.path.*
 
 /**
  * Kotlog represents a static side generator which is tailored to the use case
  * of the developer behind this spare time project.
  *
  * @param args CLI arguments which will be processed
- * @param configuration Blog configuration
+ * @param presetConfiguration Optional blog configuration, if empty config file is required.
  *
  * Possible CLI arguments:
  *  - `-c 'My awesome title'`: Creates a new blog post
@@ -39,8 +37,9 @@ import kotlin.io.path.writeText
  *  - `-g` : Generates html output
  *  - `-p` : Publish aka pushes changes to remote
  *  - `-co`: To publish output files
+ *  -  `cc`: To create a new configuration file
  */
-class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
+class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null) {
     companion object {
         // MARK: - Internal constants -
 
@@ -49,6 +48,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
 
         // MARK: - Private constants -
 
+        private val ABSOLUTE_CONFIG_PATH = System.getProperty("user.home")+"/.kotlog"
         private const val RELATIVE_POSTS_PATH = "__posts"
         private const val RELATIVE_STYLES_PATH = "__styles"
 
@@ -56,26 +56,38 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         private const val INDEX_OUTPUT_FILENAME = "index.html"
 
         private val REQUIRED_FOLDERS = listOf(RELATIVE_STYLES_PATH)
-        private val EMBEDDED_FILENAMES = listOf("style.css","apple-touch-icon.png","favicon.ico", "icon.svg")
+        private val EMBEDDED_FILENAMES = listOf("style.css", "apple-touch-icon.png", "favicon.ico", "icon.svg")
     }
 
     // MARK: - Private properties -
 
-    private val configuration: BlogConfiguration
+    private lateinit var configuration: BlogConfiguration
 
     // MARK: - Init -
 
     init {
-        // Set configuration
-        this.configuration = configuration
-
-        // Run generator
-        run(args)
+        // Check if a preset configuration has been set.
+        if (presetConfiguration != null) {
+            run(args, presetConfiguration)
+        }
+        // If no preset configuration is given, try to load from file
+        else {
+            val configFromFile = loadConfigFromFile()
+            if (configFromFile == null) {
+                printConfigFileMissing()
+            } else {
+                run(args, configFromFile)
+            }
+        }
     }
+
 
     // MARK: - Run -
 
-    private fun run(args: Array<String>) {
+    private fun run(args: Array<String>, configuration: BlogConfiguration) {
+        // Set resulting configuration
+        this.configuration = configuration
+
         // Greet the user
         printGreeting()
 
@@ -84,10 +96,9 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         // 2. Perform sanity check.
         //      -> if not, print error message
         // 3. Process cli arguments
-        if(args.isEmpty()) {
+        if (args.isEmpty()) {
             printHelp()
-        }
-        else if (sanityCheckRequiredFoldersAndFiles()) {
+        } else if (sanityCheckRequiredFoldersAndFiles()) {
             processCliArguments(args)
         } else {
             printSanityCheckFailedMessage()
@@ -128,6 +139,12 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
             description = "Cleans the output directory"
         )
 
+        val createConfig by parser.option(
+            ArgType.Boolean,
+            shortName = "cc",
+            description = "Creates an empty config file in user's home directory"
+        )
+
         parser.parse(args)
 
         // Evaluate CLI arguments
@@ -156,10 +173,15 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
             clean == true -> {
                 cleanOutput()
             }
+
+            // Check if -cc is set -> Create configuration file
+            createConfig == true -> {
+                createConfigFile()
+            }
         }
     }
 
-    private fun processCliOpenMarkdownFile(filename: String) {
+    private fun processCliOpenMdFileInput(filename: String) {
         print("Open Markdown file in VSCode? (y/n)\n> ")
         val boolString = readLine()
 
@@ -171,12 +193,23 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         }
     }
 
-    private fun processCliPublishOutput() {
+    private fun processCliPublishInput() {
         print("Do you want to publish the changes? (y/n)\n> ")
         val boolString = readLine()
 
         if (boolString == "y") {
             pushToRemote()
+        }
+    }
+
+    private fun processCliNewConfigInput() {
+        print("Open config file in VSCode? (y/n)\n> ")
+        val boolString = readLine()
+
+        if (boolString == "y") {
+            shellRun {
+                command("code", listOf(ABSOLUTE_CONFIG_PATH))
+            }
         }
     }
 
@@ -190,7 +223,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
 
         writeToPosts(filename, markdown)
         printNewPostMessage(filename)
-        processCliOpenMarkdownFile(filename)
+        processCliOpenMdFileInput(filename)
     }
 
     private fun generateMarkdownYoutubePost(videoId: String) {
@@ -239,13 +272,15 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         )
 
         // 7. Embed styles
-        EMBEDDED_FILENAMES.forEach { configuration.outputDirectoryName.copyFile("$RELATIVE_STYLES_PATH/$it") }
+        EMBEDDED_FILENAMES.forEach {
+            configuration.outputDirectoryName.copyFile("$RELATIVE_STYLES_PATH/$it")
+        }
 
         // 8. Print command to open output
         printOutputFilePath()
 
         // 9. Ask the user if changes should be published
-        processCliPublishOutput()
+        processCliPublishInput()
     }
 
     // MARK: - Pretty Prints -
@@ -263,6 +298,7 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         println("    -g : To generate output files")
         println("    -p : To publish output files")
         println("    -co: To publish output files")
+        println("    -cc: To create a new configuration file")
     }
 
     private fun printOutputFilePath() {
@@ -288,6 +324,21 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
         println("")
     }
 
+    private fun printNewConfigFileCreateMessage() {
+        println("")
+        println("A new configuration file has been created!")
+        println("Path to file: $ABSOLUTE_CONFIG_PATH")
+        println("")
+    }
+
+    private fun printConfigFileMissing() {
+        println("")
+        println("Error!")
+        println("Cannot find any configuration file at: '$ABSOLUTE_CONFIG_PATH'")
+        println("You can create a new one using the command `kotlog -cc`.")
+        println("")
+    }
+
     // MARK: - Cleaning helper -
 
     private fun cleanOutput() {
@@ -295,6 +346,31 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
             .walk()
             .filter { it.nameWithoutExtension != "assets" }
             .forEach { it.delete() }
+    }
+
+    // MARK: - Configuration helper -
+
+    private fun createConfigFile() {
+        writeToPath(
+            ABSOLUTE_CONFIG_PATH,
+            Json.encodeToString(BlogConfiguration("", "", "", "", ""))
+        )
+
+        printNewConfigFileCreateMessage()
+        processCliNewConfigInput()
+    }
+
+    private fun loadConfigFromFile(): BlogConfiguration? {
+        val json = readFromFile(ABSOLUTE_CONFIG_PATH)
+        return if (json == null) {
+            null
+        } else {
+            try {
+                Json.decodeFromString(json)
+            } catch (e: java.lang.Exception) {
+                null
+            }
+        }
     }
 
     // MARK: - File access -
@@ -324,6 +400,19 @@ class Kotlog(args: Array<String>, configuration: BlogConfiguration) {
             val newFile = path.toFile()
             newFile.createNewFile()
             newFile.writeText(input)
+        }
+    }
+
+    private fun readFromFile(filePath: String): String? {
+        val path = Path(filePath)
+        return if (!path.exists()) {
+            null
+        } else {
+            try {
+                path.readText()
+            } catch (e: Exception) {
+                null
+            }
         }
     }
 
