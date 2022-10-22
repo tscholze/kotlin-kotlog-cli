@@ -38,6 +38,7 @@ Clone the [kotlog-template repository](https://github.com/tscholze/kotlin-kotlog
 
 ## Configuration
 
+### Using configuration instance
 A Kotlog-generated blog ist configurated using the `BlogConfiguration` parameter of the `Kotlog` invocation.
 See `Main.kt` for a working example:
 
@@ -55,8 +56,20 @@ fun main(args: Array<String>) {
 }
 ```
 
+### Using configuration file
+Otherwise, Kotlog will try to load the configuration file (`~/.kotlog`) from the file system. Run `./kotlog -cc` to create a new file.
+
+```json
+{
+    "baseUrl": "https://tscholze.github.io/blog",
+    "titleText": "Tobias Scholze | The Stuttering Nerd",
+    "footerText": "Made with ❤️ without JavaScript| Kotlog | Tobias Scholze",
+    "outputDirectoryName": "www"
+}
+```
+
 ## How it looks
-![](https://github.com/tscholze/kotlin-kotlog-cli/blob/main/docs/kotlog-markdown2html.png?raw=true)
+![Flow](https://github.com/tscholze/kotlin-kotlog-cli/blob/main/docs/kotlog-markdown2html.png?raw=true)
 (Design, look and feel and other ui elements my differ from version to version)
 
 ## Features
