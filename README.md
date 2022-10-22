@@ -33,6 +33,7 @@ Clone the [kotlog-template repository](https://github.com/tscholze/kotlin-kotlog
  -g                     :  Generates HTML output
  -p                     : Publish aka pushes changes to remote
  -co                    : Clears the output
+ -cc                    : To create a new configuration file
 ```
 
 ## Configuration
