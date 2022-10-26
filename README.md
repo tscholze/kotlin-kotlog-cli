@@ -36,6 +36,8 @@ Clone the [kotlog-template repository](https://github.com/tscholze/kotlin-kotlog
  -cc                    : To create a new configuration file
 ```
 
+If the binary is not working, use `java -jar kotlog.jar [options]` as a fallback. 
+
 ## Configuration
 
 ### Using configuration instance
@@ -89,7 +91,6 @@ Otherwise, Kotlog will try to load the configuration file (`~/.kotlog`) from the
 ## Ideas
 - Switching to [Kobweb](http://kobweb.varabyte.com) / Compose for Web instead of HTML templates
 - Embedding "auto share" of new blog posts
-- Creating "social cards" that look nice if you share the post on social media
 
 ## Warning
 Do not use this tool in production or something else besides education! I just started studying Kotlin and have no idea if the source generated or consumed by the CSS is GDPR or something else compliant.
