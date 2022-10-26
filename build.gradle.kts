@@ -23,16 +23,16 @@ repositories {
 
 dependencies {
     // Markdown
-    implementation("org.commonmark:commonmark:0.19.0")
-    implementation("org.commonmark:commonmark-ext-yaml-front-matter:0.19.0")
-    implementation("org.commonmark:commonmark-ext-gfm-tables:0.19.0")
-    implementation("org.commonmark:commonmark-ext-autolink:0.19.0")
+    implementation("org.commonmark:commonmark:0.20.0")
+    implementation("org.commonmark:commonmark-ext-yaml-front-matter:0.20.0")
+    implementation("org.commonmark:commonmark-ext-gfm-tables:0.20.0")
+    implementation("org.commonmark:commonmark-ext-autolink:0.20.0")
 
     // Html
     implementation("org.jsoup:jsoup:1.15.3")
 
     // Json
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
 
     // CLI
     implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.5")
