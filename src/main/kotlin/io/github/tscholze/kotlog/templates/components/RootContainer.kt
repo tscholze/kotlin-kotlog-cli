@@ -31,8 +31,8 @@ class RootContainer (
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <meta property="og:type" content="article" />
           <meta name="twitter:card" content="summary_large_image">
-          <meta property="og:url" content="${configuration.baseUrl}$permaUrlPath" />
-          ${contentPreviewImageUrlString.let { "<meta property=\"og:image\" content=\"${configuration.baseUrl}$it\">" }}
+          <meta property="og:url" content="${configuration.baseUrl}/$permaUrlPath" />
+          ${contentPreviewImageUrlString.let { "<meta property=\"og:image\" content=\"${configuration.baseUrl}/$it\">" }}
           ${contentTitle.let { "<meta property=\"og:title\" content=\"${it}\">" }}
           ${contentAbstraction.let { "<meta property=\"og:description\" content=\"${it}\">" }}
 
