@@ -15,7 +15,10 @@ import kotlinx.serialization.json.JsonNames
  */
 @Serializable
 data class BlogConfiguration(
+    @JsonNames("base_url")
     val baseUrl: String,
+
+
     val titleText: String,
     val footerText: String,
     val outputDirectoryName: String,
