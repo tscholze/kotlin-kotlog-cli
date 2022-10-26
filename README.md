@@ -30,7 +30,7 @@ Clone the [kotlog-template repository](https://github.com/tscholze/kotlin-kotlog
 ./kotlog [options]
  -c 'My awesome title'  : Creates a new blog post
  -y 'beYqB6QXQuY'       : Creates a YouTube post
- -g                     :  Generates HTML output
+ -g                     : Generates HTML output
  -p                     : Publish aka pushes changes to remote
  -co                    : Clears the output
  -cc                    : To create a new configuration file
