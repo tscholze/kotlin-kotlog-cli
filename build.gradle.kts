@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 // MARK: - Properties -
 
 group = "io.github.tscholze"
-version = "1.0.5"
+version = "1.0.6"
 
 // MARK: - Plugins -
 
