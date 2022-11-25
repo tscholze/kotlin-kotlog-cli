@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 // MARK: - Properties -
 
 group = "io.github.tscholze"
-version = "1.0.7"
+version = "1.0.8"
 
 // MARK: - Plugins -
 
@@ -51,13 +51,13 @@ application {
 // MARK: - Gradle tasks -
 
 tasks.jar {
-    manifest {
-        attributes["Main-Class"] = "MainKt"
-    }
-    configurations["compileClasspath"].forEach { file: File ->
-        from(zipTree(file.absoluteFile))
-    }
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    manifest.attributes["Main-Class"] = "MainKt"
+    val dependencies = configurations
+            .runtimeClasspath
+            .get()
+            .map(::zipTree)
+    from(dependencies)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.test {
