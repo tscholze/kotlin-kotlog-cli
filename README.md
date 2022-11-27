@@ -96,6 +96,14 @@ Otherwise, Kotlog will try to load the configuration file (`~/.kotlog`) from the
 Do not use this tool in production or something else besides education! I just started studying Kotlin and have no idea if the source generated or consumed by the CSS is GDPR or something else compliant.
 If you have any other warnings for me, please open an issue. I'm here to learn!
 
+## How to document
+Kotlog uses [KDoc and Dokka](https://kotlinlang.org/docs/kotlin-doc.html) to document the Kotlin files it self. To run or update the documentation run one of the following Gradle commands:
+
+* `dokkaGfm` - generate GH flavored markdown documentation  
+* `dokkaHtml` - generate HTML documentation
+
+After the task was successful, the generated documentation can be found in the `build/`folder.
+
 ## Thanks to
 The app is built on the work of giants. Without the following folks, repositories and posts, my tiny project would not exist.
 
