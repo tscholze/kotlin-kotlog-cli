@@ -11,7 +11,7 @@ class Index(
     private val snippets: List<SnippetConfiguration>
 ): Renderable {
 
-    // MARK: - Renderable -
+    // MARK: - Render-able -
 
     override fun render(): String {
 

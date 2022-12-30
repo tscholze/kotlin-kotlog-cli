@@ -19,9 +19,10 @@ class RootContainer (
     private val contentHtml: String
     ): Renderable {
 
-    // MARK: - Renderable -
-
+    // MARK: - Render-able -
     override fun render(): String {
+        val icons = SocialMediaIcons(configuration.socialMedia).render()
+
        return """<!doctype html>
         <html class="no-js" lang="">
 
@@ -42,6 +43,8 @@ class RootContainer (
           <link rel="icon" href="icon.svg" type="image/svg+xml">
           <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 
+          <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
+        integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous" />
           <link rel="stylesheet" href="style.css">
         </head>
 
@@ -56,7 +59,7 @@ class RootContainer (
 
         <footer>
             <hr />
-           ${configuration.footerText}
+           ${configuration.footerText} | $icons
         </footer>
 
         </html>
