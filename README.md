@@ -66,7 +66,22 @@ Otherwise, Kotlog will try to load the configuration file (`~/.kotlog`) from the
     "baseUrl": "https://tscholze.github.io/blog",
     "titleText": "Tobias Scholze | The Stuttering Nerd",
     "footerText": "Made with ❤️ without JavaScript| Kotlog | Tobias Scholze",
-    "outputDirectoryName": "www"
+    "outputDirectoryName": "www",
+    "socialMedia": [
+        {
+            "platform": "GITHUB",
+            "id": "tscholze"
+        },
+        {
+            "platform": "TWITTER",
+            "id": "tobonautilus"
+        },
+        {
+            "platform": "MASTODON",
+            "id": "@tobonaut@mastodon.social",
+            "payload": "https://mastodon.social/@tobonaut"
+        }
+    ]
 }
 ```
 
