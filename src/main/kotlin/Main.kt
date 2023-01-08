@@ -12,6 +12,7 @@ fun main(args: Array<String>) {
     //
     // 1.2.
     // Use a configuration object in code.
+    /*
     val configuration = BlogConfiguration(
         baseUrl = "https://tscholze.github.io/blog",
         titleText = "Tobias Scholze | The Stuttering Nerd",
@@ -22,8 +23,8 @@ fun main(args: Array<String>) {
             SocialMedia(SocialMediaPlatform.TWITTER, "tobonautilus"),
             SocialMedia(SocialMediaPlatform.MASTODON, "@tobonaut@mastodon.social", "https://mastodon.social/@tobonaut")
         )
-    )
+    )*/
 
     // 2. Call and run Kotlog with command line arguments and configuration.
-    Kotlog(args, configuration)
+    Kotlog(args)
 }

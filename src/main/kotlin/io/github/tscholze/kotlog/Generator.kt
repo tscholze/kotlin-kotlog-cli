@@ -353,7 +353,7 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
     private fun createConfigFile() {
         writeToPath(
             ABSOLUTE_CONFIG_PATH,
-            Json.encodeToString(BlogConfiguration("", "", "", "", ""))
+            Json.encodeToString(configuration)
         )
 
         printNewConfigFileCreateMessage()
