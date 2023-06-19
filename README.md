@@ -27,13 +27,12 @@ Besides this, I wanted to streamline my content creation workflows by letting th
 Clone the [kotlog-template repository](https://github.com/tscholze/kotlin-kotlog-template) first, then you are ready to run the CLI.
 
 ```
-./kotlog [options]
+java -jar kotlog.jar [options]
  -c 'My awesome title'  : Creates a new blog post
  -y 'beYqB6QXQuY'       : Creates a YouTube post
  -g                     : Generates HTML output
  -p                     : Publish aka pushes changes to remote
  -co                    : Clears the output
- -cc                    : To create a new configuration file
 ```
 
 If the binary is not working, use `java -jar kotlog.jar [options]` as a fallback. 
@@ -59,7 +58,7 @@ fun main(args: Array<String>) {
 ```
 
 ### Using configuration file
-Otherwise, Kotlog will try to load the configuration file (`~/.kotlog`) from the file system. Run `./kotlog -cc` to create a new file.
+Otherwise, Kotlog will try to load the configuration file (`~/.kotlog`) from the file system. Run `./kotlog` to create a new skeleton configuration file.
 
 ```json
 {
