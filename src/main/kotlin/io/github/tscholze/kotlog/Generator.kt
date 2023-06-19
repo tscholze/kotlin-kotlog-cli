@@ -9,6 +9,7 @@ import io.github.tscholze.kotlog.templates.components.EmbeddedYouTubeVideo
 import io.github.tscholze.kotlog.templates.html.Index
 import io.github.tscholze.kotlog.templates.html.Post
 import io.github.tscholze.kotlog.templates.images.SocialMediaPreviewImage
+import io.github.tscholze.kotlog.templates.json.ConfigurationHomeFile
 import io.github.tscholze.kotlog.utils.toSlug
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
@@ -183,7 +184,7 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     private fun processCliOpenMdFileInput(filename: String) {
         print("Open Markdown file in VSCode? (y/n)\n> ")
-        val boolString = readLine()
+        val boolString = readlnOrNull()
 
         if (boolString == "y") {
             shellRun {
@@ -195,7 +196,7 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     private fun processCliPublishInput() {
         print("Do you want to publish the changes? (y/n)\n> ")
-        val boolString = readLine()
+        val boolString = readlnOrNull()
 
         if (boolString == "y") {
             pushToRemote()
@@ -204,7 +205,7 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     private fun processCliNewConfigInput() {
         print("Open config file in VSCode? (y/n)\n> ")
-        val boolString = readLine()
+        val boolString = readlnOrNull()
 
         if (boolString == "y") {
             shellRun {
@@ -335,8 +336,10 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         println("")
         println("Error!")
         println("Cannot find any configuration file at: '$ABSOLUTE_CONFIG_PATH'")
-        println("You can create a new one using the command `kotlog -cc`.")
-        println("")
+        println("Create a skeleton for .kotlog file? (y/n)")
+        if (readln() == "y") {
+            createConfigFile()
+        }
     }
 
     // MARK: - Cleaning helper -
@@ -353,7 +356,7 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
     private fun createConfigFile() {
         writeToPath(
             ABSOLUTE_CONFIG_PATH,
-            Json.encodeToString(configuration)
+            ConfigurationHomeFile().render()
         )
 
         printNewConfigFileCreateMessage()
@@ -442,7 +445,7 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         REQUIRED_FOLDERS
             .forEach {
                 val file = File(it)
-                if (!file.exists() || !file.isDirectory || file.listFiles().isEmpty()) {
+                if (!file.exists() || !file.isDirectory || file.listFiles()!!.isEmpty()) {
                     isValid = false
                 }
             }
