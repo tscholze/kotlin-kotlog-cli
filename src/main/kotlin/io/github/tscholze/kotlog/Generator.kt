@@ -30,7 +30,7 @@ import kotlin.io.path.*
  * of the developer behind this spare time project.
  *
  * @param args CLI arguments which will be processed
- * @param presetConfiguration Optional blog configuration, if empty config file is required.
+ * @param presetConfiguration Optional blog configuration, if empty a config file is required.
  *
  * Possible CLI arguments:
  *  - `-c 'My awesome title'`: Creates a new blog post
@@ -49,7 +49,8 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
         // MARK: - Private constants -
 
-        private val ABSOLUTE_CONFIG_PATH = System.getProperty("user.home")+"/.kotlog"
+        private val ABSOLUT_WORKING_DIRECTORY_CONFIG_PATH = "$WORKING_DIRECTORY/.kotlog"
+        private val ABSOLUTE_HOME_CONFIG_PATH = System.getProperty("user.home")+"/.kotlog"
         private const val RELATIVE_POSTS_PATH = "__posts"
         private const val RELATIVE_STYLES_PATH = "__styles"
 
@@ -209,7 +210,7 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
         if (boolString == "y") {
             shellRun {
-                command("code", listOf(ABSOLUTE_CONFIG_PATH))
+                command("code", listOf(ABSOLUTE_HOME_CONFIG_PATH))
             }
         }
     }
@@ -328,14 +329,14 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
     private fun printNewConfigFileCreateMessage() {
         println("")
         println("A new configuration file has been created!")
-        println("Path to file: $ABSOLUTE_CONFIG_PATH")
+        println("Path to file: $ABSOLUTE_HOME_CONFIG_PATH")
         println("")
     }
 
     private fun printConfigFileMissing() {
         println("")
         println("Error!")
-        println("Cannot find any configuration file at: '$ABSOLUTE_CONFIG_PATH'")
+        println("Cannot find any configuration file at: '$ABSOLUTE_HOME_CONFIG_PATH'")
         println("Create a skeleton for .kotlog file? (y/n)")
         if (readln() == "y") {
             createConfigFile()
@@ -355,7 +356,7 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     private fun createConfigFile() {
         writeToPath(
-            ABSOLUTE_CONFIG_PATH,
+            ABSOLUTE_HOME_CONFIG_PATH,
             ConfigurationHomeFile().render()
         )
 
@@ -363,13 +364,22 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         processCliNewConfigInput()
     }
 
+    /**
+     * Tries to load configuration json file from disk.
+     *
+     * It first tries to load from working directory
+     * and secondly from user's directory.
+     *
+     * @return Found and decoded configuration, null if no files exists or wrong formatted.
+     */
     private fun loadConfigFromFile(): BlogConfiguration? {
-        val json = readFromFile(ABSOLUTE_CONFIG_PATH)
-        return if (json == null) {
+        val jsonString = readFromFile(ABSOLUT_WORKING_DIRECTORY_CONFIG_PATH) ?: readFromFile(ABSOLUTE_HOME_CONFIG_PATH)
+
+        return if (jsonString == null) {
             null
         } else {
             try {
-                Json.decodeFromString(json)
+                Json.decodeFromString(jsonString)
             } catch (e: java.lang.Exception) {
                 null
             }
