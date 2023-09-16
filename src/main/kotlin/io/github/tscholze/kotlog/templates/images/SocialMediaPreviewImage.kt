@@ -42,8 +42,16 @@ class SocialMediaPreviewImage {
          *
          * @param postConfiguration Given configuration
          * @param outputDirectoryName Output directly name
+         * @param forced Creates only an image if there is no image with given name present.
          */
-        fun generate(postConfiguration: PostConfiguration, outputDirectoryName: String) {
+        fun generate(postConfiguration: PostConfiguration, outputDirectoryName: String, forced: Boolean = false) {
+            // Check if a file exists
+            val file = File(File("./$outputDirectoryName"), "${postConfiguration.filename}.png")
+
+            // If yes, cancel operation if forced is false.
+            if(file.exists() && !forced) {
+                return
+            }
 
             // Create canvas
             val image = BufferedImage(
@@ -73,7 +81,7 @@ class SocialMediaPreviewImage {
             }
 
             // Write file
-            ImageIO.write(image, "PNG", File(File("./$outputDirectoryName"), "${postConfiguration.filename}.png"))
+            ImageIO.write(image, "PNG", file)
         }
 
         // MARK: - Private helper -
