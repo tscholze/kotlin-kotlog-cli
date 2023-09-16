@@ -34,10 +34,11 @@ import kotlin.io.path.*
  *
  * Possible CLI arguments:
  *  - `-c 'My awesome title'`: Creates a new blog post
- *  - `-y beYqB6QXQuY`: Creates a YouTube post
- *  - `-g` : Generates html output
+ *  - `-g` : Generates html output for non-existing files
+ *  - `-fg`: Force generate html output
  *  - `-p` : Publish aka pushes changes to remote
- *  - `-co`: To publish output files
+ *  - `-y beYqB6QXQuY`: Creates a YouTube post
+ *  - `-co`: Clean output
  *  -  `cc`: To create a new configuration file
  */
 class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null) {
@@ -127,7 +128,13 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         val generate by parser.option(
             ArgType.Boolean,
             shortName = "g",
-            description = "Generate blog content"
+            description = "Generate new blog content"
+        )
+
+        val forceGenerate by parser.option(
+            ArgType.Boolean,
+            shortName = "fg",
+            description = "Force generate blog content"
         )
 
         val publish by parser.option(
@@ -163,7 +170,12 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
             // Check if -g is set -> Generate html
             generate == true -> {
-                generateHtmlOutput()
+                generateHtmlOutput(forced = false)
+            }
+
+            // Check if -fg is set -> Force generate html
+            forceGenerate == true -> {
+                generateHtmlOutput(forced = true)
             }
 
             // Check if -p is set -> Publish html
@@ -242,7 +254,7 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         generateMarkdownPost(title, content)
     }
 
-    private fun generateHtmlOutput() {
+    private fun generateHtmlOutput(forced: Boolean = false) {
         // 1. Get post configurations from markdown files
         val posts = File(RELATIVE_POSTS_PATH)
             .walk()
@@ -255,10 +267,10 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
             .toList()
 
         // 3. Transform post configs into html
-        // 4. Transform post configs into images
+        // 4. Transform post configs into images if no image is present for name
         posts.forEach {
             writeToOutput(it.filename, Post(configuration, it).render())
-            SocialMediaPreviewImage.generate(it, configuration.outputDirectoryName)
+            SocialMediaPreviewImage.generate(it, configuration.outputDirectoryName, forced = forced)
         }
 
         // 5. Transform snippets into index html
@@ -297,9 +309,10 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         println("Please specify an argument what you want to do.")
         println("    -c : 'My awesome title' : To create a new Markdown post")
         println("    -y : 'xcg24fa' : To create a new YouTube video Markdown post")
-        println("    -g : To generate output files")
+        println("    -g : To generate new output files")
         println("    -p : To publish output files")
-        println("    -co: To publish output files")
+        println("    -fg: To force generate output files")
+        println("    -co: Cleans output directory")
         println("    -cc: To create a new configuration file")
     }
 
