@@ -58,7 +58,7 @@ fun main(args: Array<String>) {
 ```
 
 ### Using configuration file
-Otherwise, Kotlog will try to load the configuration file (`~/.kotlog`) from the file system. Run `./kotlog` to create a new skeleton configuration file.
+Otherwise, Kotlog will try to load the configuration file from working directory's or user home's `~/.kotlog` file from the file system. Run `./kotlog` to create a new skeleton configuration file.
 
 ```json
 {
