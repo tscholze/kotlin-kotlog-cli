@@ -31,11 +31,10 @@ java -jar kotlog.jar [options]
  -c 'My awesome title'  : Creates a new blog post
  -y 'beYqB6QXQuY'       : Creates a YouTube post
  -g                     : Generates HTML output
+ -fg                    : To force generate output files"
  -p                     : Publish aka pushes changes to remote
  -co                    : Clears the output
-```
-
-If the binary is not working, use `java -jar kotlog.jar [options]` as a fallback. 
+``` 
 
 ## Configuration
 
@@ -91,8 +90,8 @@ Otherwise, Kotlog will try to load the configuration file from working directory
 ## Features
 
 ### Blogging
-- Creates pre-configurated Markdown files for blog posts 
-- Supports Frontmatter for meta information
+- Creates pre-configuration Markdown files for blog posts 
+- Supports Front-matter for meta information
 - Renders markdown files into HTML blog articles
 - Renders a feed.json with snippets of blog articles
 
