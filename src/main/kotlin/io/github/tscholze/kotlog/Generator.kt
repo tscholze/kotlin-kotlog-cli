@@ -349,8 +349,8 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
     private fun printConfigFileMissing() {
         println("")
         println("Error!")
-        println("Cannot find any configuration file at: '$ABSOLUTE_HOME_CONFIG_PATH'")
-        println("Create a skeleton for .kotlog file? (y/n)")
+        println("Cannot find any configuration file at: '$ABSOLUT_WORKING_DIRECTORY_CONFIG_PATH' or '$ABSOLUTE_HOME_CONFIG_PATH'")
+        println("Create a skeleton for ~/.kotlog file? (y/n)")
         if (readln() == "y") {
             createConfigFile()
         }
