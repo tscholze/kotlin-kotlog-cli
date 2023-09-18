@@ -1,6 +1,6 @@
 package io.github.tscholze.kotlog.models
 
-import io.github.tscholze.kotlog.Kotlog.Companion.DATE_FORMATTER
+import io.github.tscholze.kotlog.Kotlog.Companion.FILENAME_DATE_FORMATTER
 import kotlinx.serialization.Serializable
 
 /**
@@ -22,11 +22,18 @@ class SnippetConfiguration(
     val coverImageUrl: String
 ) {
     companion object {
+        /**
+         * Creates a new instance from given arguments
+         *
+         * @param configuration Underlying post configuration
+         * @param baseUrlString Blog's base url
+         * @return Created snippet configuration
+         */
         fun from(configuration: PostConfiguration, baseUrlString: String): SnippetConfiguration {
             return SnippetConfiguration(
                 configuration.title,
                 configuration.tags.first(),
-                configuration.created.format(DATE_FORMATTER),
+                configuration.created.format(FILENAME_DATE_FORMATTER),
                 "$baseUrlString/${configuration.filename}",
                 "$baseUrlString/${configuration.filename}.png"
             )

@@ -62,7 +62,7 @@ class PostConfiguration(
             }
 
             val abstract = frontMatterVisitor.data["abstract"]?.first() ?: ""
-            val date = LocalDate.parse(dateString, Kotlog.DATE_FORMATTER)
+            val date = LocalDate.parse(dateString, Kotlog.FILENAME_DATE_FORMATTER)
             val tags = frontMatterVisitor.data["tags"] ?: listOf("none")
 
             // Generate inner html string

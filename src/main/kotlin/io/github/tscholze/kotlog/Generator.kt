@@ -45,11 +45,15 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
     companion object {
         // MARK: - Internal constants -
 
-        val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneOffset.UTC)!!
-        val WORKING_DIRECTORY = Paths.get("").toAbsolutePath().toString()
+        /**
+         * Date formatter to convert date to filename (component).
+         * Format: 2023-09-12
+         */
+        val FILENAME_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneOffset.UTC)!!
 
         // MARK: - Private constants -
 
+        private val WORKING_DIRECTORY = Paths.get("").toAbsolutePath().toString()
         private val ABSOLUT_WORKING_DIRECTORY_CONFIG_PATH = "$WORKING_DIRECTORY/.kotlog"
         private val ABSOLUTE_HOME_CONFIG_PATH = System.getProperty("user.home")+"/.kotlog"
         private const val RELATIVE_POSTS_PATH = "__posts"
@@ -68,6 +72,13 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     // MARK: - Init -
 
+    /**
+     * Initializes a new Generator instance.
+     *
+     * It checks if a configuration was given.
+     * If not, it tries to load one of the configuration files.
+     * If this fails, a warning hint message will be displayed.
+     */
     init {
         // Check if a preset configuration has been set.
         if (presetConfiguration != null) {
@@ -87,6 +98,12 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     // MARK: - Run -
 
+    /**
+     * Runs the generator with given arguments and configuration.
+     *
+     * @param args Command line arguments
+     * @param configuration Blog configuration
+     */
     private fun run(args: Array<String>, configuration: BlogConfiguration) {
         // Set resulting configuration
         this.configuration = configuration
@@ -110,6 +127,11 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     // MARK: - CLI -
 
+    /**
+     * Processes given CLI arguments
+     *
+     * @param args Given CLI arguments
+     */
     private fun processCliArguments(args: Array<String>) {
         val parser = ArgParser("Kotlog - Blog generator")
 
@@ -195,6 +217,12 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         }
     }
 
+    /**
+     * Provides user interaction to open given filename
+     * with `code`.
+     *
+     * @param filename Filename to open
+     */
     private fun processCliOpenMdFileInput(filename: String) {
         print("Open Markdown file in VSCode? (y/n)\n> ")
         val boolString = readlnOrNull()
@@ -207,6 +235,9 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         }
     }
 
+    /**
+     * Provides user interaction to publish git changes to remote.
+     */
     private fun processCliPublishInput() {
         print("Do you want to publish the changes? (y/n)\n> ")
         val boolString = readlnOrNull()
@@ -216,6 +247,9 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         }
     }
 
+    /**
+     * Provides user interaction to open created ~/. configuration file
+     */
     private fun processCliNewConfigInput() {
         print("Open config file in VSCode? (y/n)\n> ")
         val boolString = readlnOrNull()
@@ -229,8 +263,14 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     // MARK: - Generators -
 
+    /**
+     * Generated Markdown post with given title and content.
+     *
+     * @param title Title of the post
+     * @param content Optional md-flavored content of the post.
+     */
     private fun generateMarkdownPost(title: String, content: String? = null) {
-        val filename = "${DATE_FORMATTER.format(Date().toInstant())}-${title.toSlug()}.md"
+        val filename = "${FILENAME_DATE_FORMATTER.format(Date().toInstant())}-${title.toSlug()}.md"
         val markdown = io.github.tscholze.kotlog.templates.markdown.Post(
             title, content ?: "Your content goes here"
         ).render()
@@ -240,6 +280,9 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         processCliOpenMdFileInput(filename)
     }
 
+    /**
+     * Generates Markdown post for given YouTube video id
+     */
     private fun generateMarkdownYoutubePost(videoId: String) {
         val videoUrl = "https://www.youtube.com/watch?v=$videoId"
         val embedUrl = "https://www.youtube.com/embed/$videoId"
@@ -254,6 +297,11 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         generateMarkdownPost(title, content)
     }
 
+    /**
+     * Generates html output for markdown files
+     *
+     * @param forced If true, all files will be fresh generated
+     */
     private fun generateHtmlOutput(forced: Boolean = false) {
         // 1. Get post configurations from markdown files
         val posts = File(RELATIVE_POSTS_PATH)
@@ -299,11 +347,17 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     // MARK: - Pretty Prints -
 
+    /**
+     * Console prints user's greeting
+     */
     private fun printGreeting() {
         println("")
         println("Welcome to Kotlog <3")
     }
 
+    /**
+     * Console prints usage help
+     */
     private fun printHelp() {
         println("ERROR: No arguments given.")
         println("Please specify an argument what you want to do.")
@@ -316,6 +370,9 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         println("    -cc: To create a new configuration file")
     }
 
+    /**
+     * Console prints html output folder path
+     */
     private fun printOutputFilePath() {
         println("")
         println("Html has been generated to folder:")
@@ -323,6 +380,9 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         println("")
     }
 
+    /**
+     * Console prints created Markdown file path
+     */
     private fun printNewPostMessage(filenameWithExtension: String) {
         println("")
         println("New post '$filenameWithExtension' has been created!")
@@ -331,6 +391,9 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         println("")
     }
 
+    /**
+     * Console prints error message that required folders are missing
+     */
     private fun printSanityCheckFailedMessage() {
         println("")
         println("Error!")
@@ -339,6 +402,9 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         println("")
     }
 
+    /**
+     * Console prints path to generated configuration file
+     */
     private fun printNewConfigFileCreateMessage() {
         println("")
         println("A new configuration file has been created!")
@@ -346,6 +412,9 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         println("")
     }
 
+    /**
+     * Console prints that the configuration file is missing
+     */
     private fun printConfigFileMissing() {
         println("")
         println("Error!")
@@ -358,6 +427,9 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     // MARK: - Cleaning helper -
 
+    /**
+     * Cleans files in output directory without touching assets
+     */
     private fun cleanOutput() {
         File(configuration.outputDirectoryName)
             .walk()
@@ -367,6 +439,9 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     // MARK: - Configuration helper -
 
+    /**
+     * Creates configuration file in home directory.
+     */
     private fun createConfigFile() {
         writeToPath(
             ABSOLUTE_HOME_CONFIG_PATH,
@@ -401,14 +476,32 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     // MARK: - File access -
 
+    /**
+     * Writes to Posts directory
+     *
+     * @param filenameWithExtension filename
+     * @param input Content of the file
+     */
     private fun writeToPosts(filenameWithExtension: String, input: String) {
         writeToPath("$RELATIVE_POSTS_PATH/$filenameWithExtension", input)
     }
 
+    /**
+     * Writes to Output directory
+     *
+     * @param filenameWithExtension filename
+     * @param input Content of the file
+     */
     private fun writeToOutput(filenameWithExtension: String, input: String) {
         writeToPath("${configuration.outputDirectoryName}/$filenameWithExtension", input)
     }
 
+    /**
+     * Writes content to given path
+     *
+     * @param filePath Path to file that shall be created
+     * @param input Content of the file
+     */
     private fun writeToPath(filePath: String, input: String) {
         // If file exists, overwrite it
         // This will not happen if you clean the output folder first
@@ -429,6 +522,12 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         }
     }
 
+    /**
+     * Reads content from file path
+     *
+     * @param filePath Path to file that shall be read
+     * @return Found file's content, if no file exists, it will return null
+     */
     private fun readFromFile(filePath: String): String? {
         val path = Path(filePath)
         return if (!path.exists()) {
@@ -442,6 +541,11 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
         }
     }
 
+    /**
+     * Copies file using command line functions
+     *
+     * @param fromFilePath Original file path
+     */
     private fun String.copyFile(fromFilePath: String) {
         shellRun {
             command("cp", listOf("-f", fromFilePath, this@copyFile))
@@ -450,8 +554,11 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     // MARK: - Git -
 
+    /**
+     * Pushes changes to Git remote
+     */
     private fun pushToRemote() {
-        val message = "Content update ${DATE_FORMATTER.format(Date().toInstant())}"
+        val message = "Content update ${FILENAME_DATE_FORMATTER.format(Date().toInstant())}"
         shellRun {
             git.commitAllChanges(message)
             git.push("origin", "main")
@@ -461,6 +568,11 @@ class Kotlog(args: Array<String>, presetConfiguration: BlogConfiguration? = null
 
     // MARK: - Sanity checks -
 
+    /**
+     * Checks if all required folders exist
+     *
+     * @return True if check was successful
+     */
     private fun sanityCheckRequiredFoldersAndFiles(): Boolean {
         var isValid = true
 
