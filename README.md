@@ -1,5 +1,5 @@
 # kotlin-kotlog-cli
-**Kot**lin B**log** is a CLI static blog generator - not intended for public or production use. It features some handy shortcuts to streamline my content creation workflows.
+**Kot**lin B**log** is a CLI static blog generator - not intended for public or production use. It features some handy shortcuts to streamline my content creation workflows. Kotlog is used to generate my personal blog: [tscholze.github.io/blog](https://tscholze.github.io/blog/)
 
 ## tl;dr
 No, I do not think that you want to use this Kotlin CLI. It is meant as a content creation helper for me needs. But if you find it interesting, awesome!
