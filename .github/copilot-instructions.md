@@ -4,6 +4,7 @@
 - Kotlog is a Kotlin CLI for generating a personal static blog.
 - It is intentionally tailored to the repository owner's workflow and is not positioned as a production-ready general-purpose blog engine.
 - The main entry point is `src/main/kotlin/Main.kt`, which invokes `Kotlog(args)`.
+- It uses `SocialMediaPreviewImage.kt` and the embedded base64 image value string to create social media preview images based on the title
 
 ## Core user workflows
 - `-c "Title"` creates a new Markdown blog post stub.
