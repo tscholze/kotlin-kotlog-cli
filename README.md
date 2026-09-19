@@ -4,6 +4,8 @@
 ## tl;dr
 No, I do not think that you want to use this Kotlin CLI. It is meant as a content creation helper for me needs. But if you find it interesting, awesome!
 
+For repository-specific Copilot guidance, see `.github/copilot-instructions.md`.
+
 ![](https://github.com/tscholze/kotlin-kotlog-cli/blob/main/docs/kotlog-desc.png?raw=true)
 
 ## Why?
