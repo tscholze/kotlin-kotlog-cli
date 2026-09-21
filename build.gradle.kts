@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 // MARK: - Properties -
 
@@ -8,9 +9,9 @@ version = "1.0.10"
 // MARK: - Plugins -
 
 plugins {
-    kotlin("jvm") version "1.7.10"
-    kotlin("plugin.serialization") version "1.7.10"
-    id("org.jetbrains.dokka") version "1.7.20"
+    kotlin("jvm") version "2.4.20"
+    kotlin("plugin.serialization") version "2.4.20"
+    id("org.jetbrains.dokka") version "2.2.0"
     application
 }
 
@@ -24,20 +25,20 @@ repositories {
 
 dependencies {
     // Markdown
-    implementation("org.commonmark:commonmark:0.20.0")
-    implementation("org.commonmark:commonmark-ext-yaml-front-matter:0.20.0")
-    implementation("org.commonmark:commonmark-ext-gfm-tables:0.20.0")
-    implementation("org.commonmark:commonmark-ext-autolink:0.20.0")
+    implementation("org.commonmark:commonmark:0.30.0")
+    implementation("org.commonmark:commonmark-ext-yaml-front-matter:0.30.0")
+    implementation("org.commonmark:commonmark-ext-gfm-tables:0.30.0")
+    implementation("org.commonmark:commonmark-ext-autolink:0.30.0")
 
     // Html
-    implementation("org.jsoup:jsoup:1.15.3")
+    implementation("org.jsoup:jsoup:1.23.2")
 
     // Json
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
     // CLI
-    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.5")
-    implementation("com.lordcodes.turtle:turtle:0.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.6")
+    implementation("com.lordcodes.turtle:turtle:0.10.0")
 
     // Test
     testImplementation(kotlin("test"))
@@ -66,5 +67,7 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
 }
